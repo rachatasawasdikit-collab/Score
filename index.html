@@ -51,12 +51,6 @@
     padding: 18px 32px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-  }
-  .header-left {
-    display: flex;
-    align-items: center;
     gap: 20px;
   }
   .header-logo {
@@ -72,18 +66,15 @@
   .header-logo svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 1.8; }
   .header-title h1 { font-size: 18px; font-weight: 600; letter-spacing: 0.3px; }
   .header-title p { font-size: 13px; color: var(--blue-100); margin-top: 2px; font-weight: 300; }
-  
-  .sync-status {
-    font-size: 12px;
-    color: var(--blue-100);
+  .header-badge {
+    margin-left: auto;
     background: rgba(255,255,255,0.1);
-    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 14px;
     border-radius: 20px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: 12px;
+    color: #cde;
   }
-  .sync-dot { width: 8px; height: 8px; background: #52c41a; border-radius: 50%; display: inline-block; }
 
   .main { max-width: 1100px; margin: 0 auto; padding: 28px 32px; }
 
@@ -196,7 +187,7 @@
   }
   .equip-card:hover { border-color: var(--blue-600); background: var(--blue-50); }
   .equip-card.selected { border-color: var(--blue-600); background: var(--blue-50); }
-  .equip-card.borrowed { border-color: var(--amber-600); background: var(--amber-50); opacity: 0.7; }
+  .equip-card.unavailable { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
   .equip-name { font-size: 14px; font-weight: 600; color: var(--blue-900); margin-bottom: 4px; }
   .equip-id { font-size: 11px; color: var(--gray-400); margin-bottom: 8px; }
   .equip-status {
@@ -280,9 +271,22 @@
   }
   .toast.show { transform: translateY(0); opacity: 1; }
 
+  .divider { height: 1px; background: var(--gray-100); margin: 20px 0; }
+
+  .sheet-url-section {
+    background: var(--gray-50); border: 1px solid var(--gray-100);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .sheet-url-section label { font-size: 13px; font-weight: 600; color: var(--gray-800); display: block; margin-bottom: 8px; }
+  .sheet-url-row { display: flex; gap: 10px; }
+  .sheet-url-row .form-control { flex: 1; font-size: 12px; }
+  .url-status { font-size: 12px; margin-top: 6px; color: var(--gray-400); }
+  .url-status.connected { color: var(--green-600); font-weight: 600; }
+
   .selected-equip-info {
-    background: var(--blue-50);
-    border: 1px solid var(--blue-100);
+    background: var(--blue-50); border: 1px solid var(--blue-100);
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 16px;
@@ -316,6 +320,7 @@
     .grid-2 { grid-template-columns: 1fr; }
     .header-inner { padding: 14px 18px; }
     .main { padding: 18px; }
+    .header-badge { display: none; }
   }
 </style>
 </head>
@@ -323,22 +328,30 @@
 
 <header>
   <div class="header-inner">
-    <div class="header-left">
-      <div class="header-logo">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
-      </div>
-      <div class="header-title">
-        <h1>ระบบยืม-คืนอุปกรณ์กายภาพบำบัด</h1>
-        <p>แผนกกายภาพบำบัด — โรงพยาบาล</p>
-      </div>
+    <div class="header-logo">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
     </div>
-    <div class="sync-status" id="syncLabel">
-      <span class="sync-dot" style="background:#888"></span> กำลังเริ่มระบบ...
+    <div class="header-title">
+      <h1>ระบบยืม-คืนอุปกรณ์กายภาพบำบัด</h1>
+      <p>แผนกกายภาพบำบัด — โรงพยาบาล</p>
     </div>
+    <div class="header-badge" id="sheetStatusBadge">เชื่อมต่อ Google Sheets แล้ว</div>
   </div>
 </header>
 
 <div class="main">
+
+  <div class="sheet-url-section">
+    <label>Google Apps Script Web App URL (สำหรับส่งข้อมูลไป Google Sheets)</label>
+    <div class="sheet-url-row">
+      <input type="text" class="form-control" id="sheetUrl" placeholder="https://script.google.com/macros/s/..." />
+      <button class="btn btn-primary btn-sm" onclick="saveSheetUrl()">
+        <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+        บันทึก
+      </button>
+    </div>
+    <div class="url-status" id="urlStatus">กรอก URL ของ Google Apps Script แล้วกดบันทึก</div>
+  </div>
 
   <div class="grid-3">
     <div class="stat-card">
@@ -389,7 +402,7 @@
           <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h8m-8 6h16"/></svg>
           เลือกอุปกรณ์ที่ต้องการยืม
         </div>
-        <div class="section-title">รายการอุปกรณ์ทั้งหมด</div>
+        <div class="section-title">อุปกรณ์ที่พร้อมให้ยืม</div>
         <div class="equip-grid" id="equipGrid"></div>
       </div>
 
@@ -548,9 +561,38 @@
 let equipments = [];
 let transactions = [];
 let selectedEquipId = null;
+// ฝัง URL ของคุณลงไปโดยตรงเพื่อความสะดวกในการใช้งานเริ่มต้น
+let sheetUrl = 'https://script.google.com/macros/s/AKfycbw8QN2P_0I8wN7i-aNW3Debpf8Ed134Go7ZFqCq_FDxnq2LKcgx5w2lrnKm-G1iy95LPQ/exec';
 
-// ⚠️ ใส่ URL ของ Google Apps Script Web App ตรงนี้ได้เลยครับ
-let sheetUrl = 'https://script.google.com/macros/s/XXXXXX/exec'; 
+const STORAGE_KEY_EQUIP = 'pt_equipments';
+const STORAGE_KEY_TRANS = 'pt_transactions';
+const STORAGE_KEY_URL = 'pt_sheet_url';
+
+function loadData() {
+  try {
+    const eq = localStorage.getItem(STORAGE_KEY_EQUIP);
+    const tr = localStorage.getItem(STORAGE_KEY_TRANS);
+    const url = localStorage.getItem(STORAGE_KEY_URL);
+    if (eq) equipments = JSON.parse(eq);
+    if (tr) transactions = JSON.parse(tr);
+    if (url) {
+      sheetUrl = url;
+    }
+    // อัปเดตการแสดงผลของช่อง URL บนหน้าเว็บ
+    document.getElementById('sheetUrl').value = sheetUrl;
+    document.getElementById('urlStatus').textContent = 'เชื่อมต่อแล้ว: ' + sheetUrl.substring(0, 60) + '...';
+    document.getElementById('urlStatus').className = 'url-status connected';
+    document.getElementById('sheetStatusBadge').textContent = 'เชื่อมต่อ Google Sheets แล้ว';
+  } catch(e) {}
+  if (equipments.length === 0) loadDefaultEquipments();
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY_EQUIP, JSON.stringify(equipments));
+    localStorage.setItem(STORAGE_KEY_TRANS, JSON.stringify(transactions));
+  } catch(e) {}
+}
 
 function loadDefaultEquipments() {
   equipments = [
@@ -558,370 +600,4 @@ function loadDefaultEquipments() {
     { id: 'PT-002', name: 'เครื่อง Ultrasound Therapy', category: 'electrotherapy', status: 'available', note: '' },
     { id: 'PT-003', name: 'เครื่อง Infrared Lamp', category: 'thermal', status: 'available', note: '' },
     { id: 'PT-004', name: 'ไม้เท้า 4 ขา (Quad Cane)', category: 'mobility', status: 'available', note: '' },
-    { id: 'PT-005', name: 'Walker มาตรฐาน', category: 'mobility', status: 'available', note: '' },
-    { id: 'PT-006', name: 'ไม้ค้ำยัน (Axillary Crutch)', category: 'mobility', status: 'available', note: '' },
-    { id: 'PT-007', name: 'Theraband (ยางยืด)', category: 'exercise', status: 'available', note: '' },
-    { id: 'PT-008', name: 'ลูกบอลกายภาพ (Exercise Ball)', category: 'exercise', status: 'available', note: '' },
-    { id: 'PT-009', name: 'เครื่องวัดองศาข้อต่อ (Goniometer)', category: 'assessment', status: 'available', note: '' },
-    { id: 'PT-010', name: 'เครื่อง Hot Pack / Cold Pack', category: 'thermal', status: 'available', note: '' }
-  ];
-}
-
-// 🌐 ฟังก์ชันดึงข้อมูลแบบ Real-time จาก Google Sheets
-async function pullDataFromSheet() {
-  if (!sheetUrl || sheetUrl.includes('XXXXXX')) {
-    document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#ff4d4f"></span> ไม่ได้ใส่ Web App URL';
-    return;
-  }
-  
-  try {
-    const response = await fetch(sheetUrl);
-    if (!response.ok) throw new Error('Network response error');
-    const data = await response.json();
-    
-    if (Array.isArray(data)) {
-      // ตรวจสอบว่าแผ่นข้อมูลส่งโครงสร้างประวัติการยืม (Transactions) หรือไม่
-      if (data.length > 0 && (data[0].transId || data[0].action)) {
-        transactions = data;
-        
-        // รีเซ็ตสถานะเป็นว่างก่อน จากนั้นตรวจสอบว่าชิ้นไหนโดนยืมอยู่บ้าง
-        equipments.forEach(e => e.status = 'available');
-        transactions.forEach(t => {
-          if ((t.action === 'BORROW' || t.action === 'WEB_BORROW') && !t.returnedAt) {
-            const eq = equipments.find(e => e.id === t.equipId);
-            if (eq) eq.status = 'borrowed';
-          }
-        });
-      } else {
-        // หากฝั่งชีตส่งรายชื่ออุปกรณ์พร้อมสถานะตรงๆ
-        data.forEach(item => {
-          const id = (item.equipId || item.id || '').trim();
-          const status = (item.status || item.action || '').trim().toLowerCase();
-          const eq = equipments.find(e => e.id === id);
-          if (eq) {
-            if (status === 'borrowed' || status === 'borrow' || status === 'ยืม') {
-              eq.status = 'borrowed';
-            } else {
-              eq.status = 'available';
-            }
-          }
-        });
-      }
-      
-      document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#52c41a"></span> ซิงค์ข้อมูลกับชีตเรียบร้อย';
-      
-      // อัปเดตการแสดงผลหน้าจอทั้งหมด
-      updateStats();
-      renderEquipGrid();
-      renderReturnList();
-      renderHistory();
-      renderEquipTable();
-    }
-  } catch (error) {
-    console.error("ดึงข้อมูลชีตไม่สำเร็จ:", error);
-    document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#faad14"></span> เชื่อมต่อล้มเหลว (กำลังลองใหม่)';
-  }
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    const ids = ['borrow','return','history','manage'];
-    btn.classList.toggle('active', ids[i] === name);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'return') renderReturnList();
-  if (name === 'manage') renderEquipTable();
-}
-
-function renderEquipGrid() {
-  const grid = document.getElementById('equipGrid');
-  if (equipments.length === 0) {
-    grid.innerHTML = '<div style="color:var(--gray-400);font-size:13px;padding:12px 0">ไม่มีอุปกรณ์ในระบบ</div>';
-    return;
-  }
-  grid.innerHTML = equipments.map(e => {
-    const isSelected = e.id === selectedEquipId;
-    const isBorrowed = e.status === 'borrowed';
-    let cardClass = "equip-card";
-    if (isSelected) cardClass += " selected";
-    if (isBorrowed) cardClass += " borrowed";
-    
-    return `
-      <div class="${cardClass}" onclick="${isBorrowed ? "showToast('อุปกรณ์ชิ้นนี้ถูกยืมอยู่')" : `selectEquip('${e.id}')`}">
-        <div class="equip-name">${e.name}</div>
-        <div class="equip-id">${e.id}</div>
-        ${isBorrowed 
-          ? '<span class="equip-status borrowed"><span class="equip-status-dot"></span>ถูกยืมอยู่</span>' 
-          : '<span class="equip-status available"><span class="equip-status-dot"></span>พร้อมให้ยืม</span>'
-        }
-      </div>
-    `;
-  }).join('');
-}
-
-function selectEquip(id) {
-  selectedEquipId = id;
-  const eq = equipments.find(e => e.id === id);
-  const info = document.getElementById('selectedEquipInfo');
-  info.style.display = 'block';
-  info.innerHTML = '<strong>อุปกรณ์ที่เลือก:</strong> ' + eq.name + ' <span style="color:var(--gray-400);font-size:12px">(' + eq.id + ')</span>';
-  renderEquipGrid();
-}
-
-function updateStats() {
-  const total = equipments.length;
-  const avail = equipments.filter(e => e.status === 'available').length;
-  const borrowed = equipments.filter(e => e.status === 'borrowed').length;
-  const today = transactions.filter(t => {
-    const d = new Date(t.timestamp);
-    const n = new Date();
-    return d.toDateString() === n.toDateString();
-  }).length;
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAvail').textContent = avail;
-  document.getElementById('statBorrowed').textContent = borrowed;
-  document.getElementById('statToday').textContent = today;
-}
-
-function showMsg(elId, type, msg) {
-  const el = document.getElementById(elId);
-  if (!msg) { el.innerHTML = ''; return; }
-  const icons = {
-    success: '<path d="M5 12l5 5L20 7"/>',
-    error: '<path d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>',
-    info: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>'
-  };
-  el.innerHTML = `<div class="alert alert-${type}"><svg viewBox="0 0 24 24">${icons[type]}</svg><span>${msg}</span></div>`;
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-async function sendToSheet(payload) {
-  if (!sheetUrl || sheetUrl.includes('XXXXXX')) return { ok: false, reason: 'no-url' };
-  try {
-    await fetch(sheetUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      mode: 'no-cors'
-    });
-    return { ok: true };
-  } catch(e) {
-    return { ok: false, reason: e.message };
-  }
-}
-
-function genTransId() {
-  const now = new Date();
-  const pad = n => String(n).padStart(2,'0');
-  return `TR-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-}
-
-async function submitBorrow() {
-  showMsg('borrowFormMsg','','');
-  const borrowerName = document.getElementById('borrowerName').value.trim();
-  const department = document.getElementById('department').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const dueDate = document.getElementById('dueDate').value;
-  const note = document.getElementById('borrowNote').value.trim();
-
-  if (!selectedEquipId) return showMsg('borrowFormMsg','error','กรุณาเลือกอุปกรณ์ที่ต้องการยืม');
-  if (!borrowerName) return showMsg('borrowFormMsg','error','กรุณากรอกชื่อผู้ยืม');
-  if (!department) return showMsg('borrowFormMsg','error','กรุณากรอกแผนก/หน่วยงาน');
-  if (!phone) return showMsg('borrowFormMsg','error','กรุณากรอกเบอร์โทรศัพท์');
-  if (!dueDate) return showMsg('borrowFormMsg','error','กรุณาระบุวันที่กำหนดคืน');
-
-  const eq = equipments.find(e => e.id === selectedEquipId);
-  const btn = document.getElementById('borrowBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
-
-  const transId = genTransId();
-  const timestamp = new Date().toISOString();
-  
-  const trans = { transId, timestamp, equipId: selectedEquipId, equipName: eq.name, borrowerName, department, phone, dueDate, note, action: 'BORROW', returnedAt: null };
-  transactions.unshift(trans);
-  eq.status = 'borrowed';
-
-  const payload = { action: 'WEB_BORROW', transId, equipId: selectedEquipId, equipName: eq.name, borrowerName, department, phone, dueDate, note, timestamp };
-  await sendToSheet(payload);
-
-  updateStats();
-  renderEquipGrid();
-
-  showMsg('borrowFormMsg','success', `ส่งข้อมูลเข้าชีตเรียบร้อย รหัส: ${transId}`);
-  showToast('ยืม ' + eq.name + ' สำเร็จ');
-  
-  document.getElementById('borrowerName').value = '';
-  document.getElementById('department').value = '';
-  document.getElementById('phone').value = '';
-  document.getElementById('dueDate').value = '';
-  document.getElementById('borrowNote').value = '';
-  selectedEquipId = null;
-  document.getElementById('selectedEquipInfo').style.display = 'none';
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืนยันการยืม';
-  
-  setTimeout(pullDataFromSheet, 1000); // ดึงข้อมูลอัปเดตจากชีตทันทีหลังจากบันทึก
-}
-
-function renderReturnList() {
-  const borrowed = transactions.filter(t => (t.action === 'BORROW' || t.action === 'WEB_BORROW') && !t.returnedAt);
-  const el = document.getElementById('returnList');
-  if (borrowed.length === 0) {
-    el.innerHTML = '<div style="color:var(--gray-400);font-size:14px;padding:12px 0">ไม่มีรายการค้างคืนในชีตตอนนี้</div>';
-    return;
-  }
-  el.innerHTML = `<div style="overflow-x:auto"><table><thead><tr>
-    <th>เลือก</th><th>รหัสรายการ</th><th>วันที่ยืม</th><th>อุปกรณ์</th><th>ผู้ยืม</th><th>แผนก</th><th>กำหนดคืน</th>
-  </tr></thead><tbody>` + borrowed.map(t => {
-    const due = new Date(t.dueDate);
-    const now = new Date();
-    const overdue = due < now;
-    return `<tr>
-      <td><div class="return-select"><input type="checkbox" id="ret_${t.transId}" value="${t.transId}" /></div></td>
-      <td style="font-family:monospace;font-size:12px">${t.transId}</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td>${t.department || '-'}</td>
-      <td><span class="badge ${overdue ? 'badge-overdue' : 'badge-borrowed'}">${t.dueDate}${overdue ? ' (เกินกำหนด)' : ''}</span></td>
-    </tr>`;
-  }).join('') + `</tbody></table></div>`;
-}
-
-async function submitReturn() {
-  const checked = [...document.querySelectorAll('[id^="ret_"]:checked')].map(c => c.value);
-  if (checked.length === 0) return showMsg('returnMsg','error','กรุณาเลือกรายการที่ต้องการคืน');
-  const btn = document.getElementById('returnBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
-  showMsg('returnMsg','','');
-
-  const now = new Date().toISOString();
-  for (const transId of checked) {
-    const trans = transactions.find(t => t.transId === transId);
-    if (!trans) continue;
-    trans.returnedAt = now;
-    trans.action = 'RETURN';
-    const eq = equipments.find(e => e.id === trans.equipId);
-    if (eq) eq.status = 'available';
-    
-    const payload = { action: 'WEB_RETURN', transId: 'RET-' + genTransId(), equipId: trans.equipId, equipName: trans.equipName, borrowerName: trans.borrowerName, department: trans.department, phone: trans.phone, dueDate: trans.dueDate, note: 'คืนสำเร็จ', timestamp: now };
-    await sendToSheet(payload);
-  }
-
-  updateStats();
-  renderReturnList();
-
-  showMsg('returnMsg','success', `ส่งคำขอคืน ${checked.length} รายการเข้าชีตแล้ว`);
-  showToast(`คืนสำเร็จ ${checked.length} รายการ`);
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg> ยืนยันการคืน';
-  
-  setTimeout(pullDataFromSheet, 1000);
-}
-
-function renderHistory() {
-  const search = document.getElementById('searchHistory').value.toLowerCase();
-  const filter = document.getElementById('filterStatus').value;
-  let list = [...transactions];
-  if (search) list = list.filter(t => t.borrowerName.toLowerCase().includes(search) || t.equipName.toLowerCase().includes(search) || t.transId.toLowerCase().includes(search));
-  if (filter) list = list.filter(t => filter === 'BORROW' ? !t.returnedAt : t.returnedAt);
-
-  const tbody = document.getElementById('historyTbody');
-  const empty = document.getElementById('historyEmpty');
-  if (list.length === 0) {
-    tbody.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
-  empty.style.display = 'none';
-  tbody.innerHTML = list.map(t => {
-    const due = new Date(t.dueDate);
-    const now = new Date();
-    const overdue = !t.returnedAt && due < now;
-    const badge = t.returnedAt ? 'badge-returned">คืนแล้ว' : (overdue ? 'badge-overdue">เกินกำหนด' : 'badge-borrowed">กำลังยืม');
-    return `<tr>
-      <td style="font-family:monospace;font-size:11px">${t.transId}</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td>${t.department || '-'}</td>
-      <td>${t.dueDate}</td>
-      <td><span class="badge ${badge}</span></td>
-    </tr>`;
-  }).join('');
-}
-
-function renderEquipTable() {
-  const tbody = document.getElementById('equipTbody');
-  tbody.innerHTML = equipments.map(e => `
-    <tr>
-      <td style="font-family:monospace;font-size:12px">${e.id}</td>
-      <td>${e.name}</td>
-      <td><span class="equip-status ${e.status === 'available' ? 'available' : 'borrowed'}"><span class="equip-status-dot"></span>${e.status === 'available' ? 'พร้อมให้ยืม' : 'ถูกยืม'}</span></td>
-      <td><button class="btn btn-sm" style="color:var(--red-600);border-color:var(--red-600);background:none" onclick="deleteEquip('${e.id}')">ลบ</button></td>
-    </tr>
-  `).join('');
-}
-
-function addEquipment() {
-  const id = document.getElementById('newEquipId').value.trim();
-  const name = document.getElementById('newEquipName').value.trim();
-  const category = document.getElementById('newEquipCategory').value;
-  const note = document.getElementById('newEquipNote').value.trim();
-  if (!id || !name) return showToast('กรุณากรอกรหัสและชื่ออุปกรณ์');
-  if (equipments.find(e => e.id === id)) return showToast('รหัสอุปกรณ์ซ้ำกัน');
-  
-  equipments.push({ id, name, category, note, status: 'available' });
-  
-  updateStats();
-  renderEquipTable();
-  renderEquipGrid();
-  
-  document.getElementById('newEquipId').value = '';
-  document.getElementById('newEquipName').value = '';
-  document.getElementById('newEquipNote').value = '';
-  showToast('เพิ่มอุปกรณ์ชั่วคราวสำเร็จ: ' + name);
-}
-
-function deleteEquip(id) {
-  const eq = equipments.find(e => e.id === id);
-  if (eq && eq.status === 'borrowed') return showToast('ไม่สามารถลบอุปกรณ์ที่กำลังถูกยืมอยู่');
-  if (!confirm('ยืนยันการลบ ' + (eq ? eq.name : id) + ' ?')) return;
-  equipments = equipments.filter(e => e.id !== id);
-  
-  updateStats();
-  renderEquipTable();
-  renderEquipGrid();
-  showToast('ลบอุปกรณ์แล้ว');
-}
-
-function setDefaultDate() {
-  const d = new Date();
-  d.setDate(d.getDate() + 3);
-  const iso = d.toISOString().split('T')[0];
-  document.getElementById('dueDate').value = iso;
-}
-
-// เริ่มต้นระบบ
-loadDefaultEquipments();
-setDefaultDate();
-updateStats();
-renderEquipGrid();
-
-// เรียกดึงข้อมูลครั้งแรก และตั้งเวลาดึงข้อมูลอัตโนมัติจากชีตทุกๆ 5 วินาที (5000ms)
-pullDataFromSheet();
-setInterval(pullDataFromSheet, 5000);
-</script>
-</body>
-</html>
+    { id: 'PT-005', name: 'Walker มาตรฐาน', category:
