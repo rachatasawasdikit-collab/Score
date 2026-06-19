@@ -1,449 +1,417 @@
 <!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ระบบยืม-คืนอุปกรณ์กายภาพบำบัด</title>
-<style>
-  :root {
-    --blue-50: #E6F1FB; --blue-100: #B5D4F4; --blue-600: #185FA5; --blue-800: #0C447C; --blue-900: #042C53;
-    --teal-50: #E1F5EE; --teal-600: #0F6E56; --teal-800: #085041; --green-50: #EAF3DE; --green-600: #3B6D11;
-    --amber-50: #FAEEDA; --amber-600: #854F0B; --red-50: #FCEBEB; --red-600: #A32D2D;
-    --gray-50: #F1EFE8; --gray-100: #D3D1C7; --gray-400: #888780; --gray-600: #5F5E5A; --gray-800: #444441;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Sarabun', sans-serif; background: #f0f4f8; color: #1a2636; min-height: 100vh; }
-  @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap');
-  header { background: var(--blue-900); color: #fff; padding: 0; border-bottom: 3px solid var(--blue-600); }
-  .header-inner { max-width: 1100px; margin: 0 auto; padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-  .header-left { display: flex; align-items: center; gap: 20px; }
-  .header-logo { width: 44px; height: 44px; background: var(--blue-600); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-  .header-logo svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 1.8; }
-  .header-title h1 { font-size: 18px; font-weight: 600; }
-  .header-title p { font-size: 13px; color: var(--blue-100); margin-top: 2px; }
-  .sync-status { font-size: 12px; background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; display: flex; align-items: center; gap: 6px; }
-  .sync-dot { width: 8px; height: 8px; background: #52c41a; border-radius: 50%; display: inline-block; }
-  .main { max-width: 1100px; margin: 0 auto; padding: 28px 32px; }
-  .tabs { display: flex; background: #fff; border: 1px solid var(--gray-100); border-radius: 10px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
-  .tab-btn { flex: 1; padding: 14px; border: none; background: transparent; font-size: 14px; font-weight: 500; color: var(--gray-600); cursor: pointer; border-right: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
-  .tab-btn:last-child { border-right: none; }
-  .tab-btn.active { background: var(--blue-50); color: var(--blue-800); font-weight: 600; }
-  .tab-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
-  .stat-card { background: #fff; border: 1px solid var(--gray-100); border-radius: 10px; padding: 18px 20px; }
-  .stat-label { font-size: 12px; color: var(--gray-600); margin-bottom: 6px; font-weight: 500; }
-  .stat-value { font-size: 28px; font-weight: 600; color: var(--blue-800); }
-  .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
-  .card { background: #fff; border: 1px solid var(--gray-100); border-radius: 12px; padding: 24px; }
-  .card-title { font-size: 15px; font-weight: 600; color: var(--blue-900); margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; gap: 8px; }
-  .card-title svg { width: 18px; height: 18px; stroke: var(--blue-600); fill: none; stroke-width: 1.8; }
-  .form-group { margin-bottom: 16px; }
-  .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--gray-800); margin-bottom: 6px; }
-  .form-label span.req { color: var(--red-600); }
-  .form-control { width: 100%; padding: 9px 12px; border: 1px solid var(--gray-100); border-radius: 7px; font-family: inherit; font-size: 14px; background: #fff; transition: 0.2s; }
-  .form-control:focus { outline: none; border-color: var(--blue-600); box-shadow: 0 0 0 3px rgba(24,95,165,0.12); }
-  .equip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px; }
-  .equip-card { border: 2px solid var(--gray-100); border-radius: 10px; padding: 14px 16px; cursor: pointer; transition: 0.2s; background: #fff; }
-  .equip-card:hover { border-color: var(--blue-600); background: var(--blue-50); }
-  .equip-card.selected { border-color: var(--blue-600); background: var(--blue-50); }
-  .equip-card.borrowed { border-color: var(--amber-600); background: var(--amber-50); opacity: 0.6; }
-  .equip-name { font-size: 14px; font-weight: 600; color: var(--blue-900); margin-bottom: 4px; }
-  .equip-id { font-size: 11px; color: var(--gray-400); margin-bottom: 8px; }
-  .equip-status { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
-  .equip-status.available { background: var(--green-50); color: var(--green-600); }
-  .equip-status.borrowed { background: var(--amber-50); color: var(--amber-600); }
-  .equip-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .btn { padding: 10px 24px; border: none; border-radius: 7px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.1s; }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: var(--blue-800); color: #fff; }
-  .btn-success { background: var(--teal-600); color: #fff; }
-  .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead tr { background: var(--gray-50); }
-  th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; border-bottom: 1px solid var(--gray-100); }
-  td { padding: 11px 14px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
-  .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-  .badge-borrowed { background: var(--amber-50); color: var(--amber-600); }
-  .badge-returned { background: var(--green-50); color: var(--green-600); }
-  .badge-overdue { background: var(--red-50); color: var(--red-600); }
-  .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
-  .alert svg { width: 18px; height: 18px; stroke: currentColor; fill: none; margin-top: 1px; }
-  .alert-success { background: var(--green-50); color: var(--green-800); }
-  .alert-error { background: var(--red-50); color: var(--red-600); }
-  .selected-equip-info { background: var(--blue-50); border: 1px solid var(--blue-100); border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px; color: var(--blue-800); }
-  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } .header-inner { flex-direction: column; align-items: flex-start; gap:12px; } }
-</style>
-</head>
-<body>
+  <html lang="th">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสมาชิก — เข้าสู่ระบบ / สมัครสมาชิก</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@600;700&family=Sarabun:wght@400;500;600&display=swap');
 
-<header>
-  <div class="header-inner">
-    <div class="header-left">
-      <div class="header-logo">
-        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 12h8M12 8v8"/></svg>
-      </div>
-      <div class="header-title">
-        <h1>ระบบยืม-คืนอุปกรณ์กายภาพบำบัด</h1>
-        <p>แผนกกายภาพบำบัด — เชื่อมต่อ Google Sheets 100%</p>
-      </div>
-    </div>
-    <div class="sync-status" id="syncLabel">
-      <span class="sync-dot" style="background:#888"></span> โหลดข้อมูล...
-    </div>
-  </div>
-</header>
-
-<div class="main">
-  <div class="grid-3">
-    <div class="stat-card"><div class="stat-label">อุปกรณ์ทั้งหมด</div><div class="stat-value" id="statTotal">0</div></div>
-    <div class="stat-card"><div class="stat-label">พร้อมให้ยืม</div><div class="stat-value" id="statAvail" style="color: var(--teal-600)">0</div></div>
-    <div class="stat-card"><div class="stat-label">กำลังถูกยืม</div><div class="stat-value" id="statBorrowed" style="color: var(--amber-600)">0</div></div>
-    <div class="stat-card"><div class="stat-label">รายการทำธุรกรรม</div><div class="stat-value" id="statToday" style="color: var(--blue-600)">0</div></div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('borrow')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืมอุปกรณ์</button>
-    <button class="tab-btn" onclick="switchTab('return')"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7 7 7-7"/></svg> คืนอุปกรณ์</button>
-    <button class="tab-btn" onclick="switchTab('history')"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ประวัติการยืม</button>
-  </div>
-
-  <div class="tab-panel active" id="tab-borrow">
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h8m-8 6h16"/></svg> เลือกอุปกรณ์ที่ต้องการยืม</div>
-        <div class="equip-grid" id="equipGrid"></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> ข้อมูลผู้ยืม</div>
-        <div id="selectedEquipInfo" class="selected-equip-info" style="display:none"></div>
-        <div class="form-group"><label class="form-label">ชื่อ-นามสกุลผู้ยืม <span class="req">*</span></label><input type="text" class="form-control" id="borrowerName" placeholder="เช่น นายสมชาย ใจดี" /></div>
-        <div class="form-group"><label class="form-label">แผนก / หน่วยงาน <span class="req">*</span></label><input type="text" class="form-control" id="department" placeholder="เช่น หอผู้ป่วยใน 3" /></div>
-        <div class="form-group"><label class="form-label">เบอร์โทรศัพท์ <span class="req">*</span></label><input type="text" class="form-control" id="phone" placeholder="เช่น 0812345678" /></div>
-        <div class="form-group"><label class="form-label">วันที่กำหนดคืน <span class="req">*</span></label><input type="date" class="form-control" id="dueDate" /></div>
-        <div class="form-group"><label class="form-label">หมายเหตุ</label><textarea class="form-control" id="borrowNote" rows="2" placeholder="ข้อมูลเพิ่มเติม (ถ้ามี)"></textarea></div>
-        <div id="borrowFormMsg"></div>
-        <button class="btn btn-primary" onclick="submitBorrow()" id="borrowBtn" style="width:100%; justify-content:center; margin-top:4px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืนยันการยืม</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-return">
-    <div class="card">
-      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7 7 7-7"/></svg> รายการอุปกรณ์ที่ค้างคืน</div>
-      <div id="returnList"></div>
-      <div id="returnMsg" style="margin-top:16px;"></div>
-      <button class="btn btn-success" onclick="submitReturn()" id="returnBtn" style="margin-top:16px"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg> ยืนยันการคืนที่เลือก</button>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-history">
-    <div class="card">
-      <div class="card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ประวัติการทำรายการ</div>
-      <div style="display:flex; gap:12px; margin-bottom:16px;">
-        <input type="text" class="form-control" id="searchHistory" style="max-width:260px" placeholder="ค้นหาชื่อผู้ยืม, อุปกรณ์" oninput="renderHistory()" />
-        <select class="form-control" id="filterStatus" style="max-width:160px" onchange="renderHistory()"><option value="">ทุกสถานะ</option><option value="BORROW">กำลังยืม</option><option value="RETURN">คืนแล้ว</option></select>
-      </div>
-      <div style="overflow-x:auto">
-        <table>
-          <thead><tr><th>รหัสรายการ</th><th>วันที่ยืม</th><th>อุปกรณ์</th><th>ผู้ยืม</th><th>แผนก</th><th>กำหนดคืน</th><th>สถานะ</th></tr></thead>
-          <tbody id="historyTbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-// ==========================================
-// ส่วนตั้งค่าระบบหลัก
-// ==========================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbw8QN2P_0I8wN7i-aNW3Debpf8Ed134Go7ZFqCq_FDxnq2LKcgx5w2lrnKm-G1iy95LPQ/exec';
-
-// 📋 รายการอุปกรณ์ตั้งต้น (เพิ่ม-ลด ได้ที่นี่เลยครับ)
-const equipments = [
-  { id: 'PT-001', name: 'เครื่อง TENS (กระตุ้นไฟฟ้า)' },
-  { id: 'PT-002', name: 'เครื่อง Ultrasound Therapy' },
-  { id: 'PT-003', name: 'เครื่อง Infrared Lamp' },
-  { id: 'PT-004', name: 'ไม้เท้า 4 ขา (Quad Cane)' },
-  { id: 'PT-005', name: 'Walker มาตรฐาน' },
-  { id: 'PT-006', name: 'ไม้ค้ำยัน (Axillary Crutch)' },
-  { id: 'PT-007', name: 'Theraband (ยางยืด)' },
-  { id: 'PT-008', name: 'ลูกบอลกายภาพ (Exercise Ball)' },
-  { id: 'PT-009', name: 'เครื่องวัดองศาข้อต่อ (Goniometer)' },
-  { id: 'PT-010', name: 'เครื่อง Hot / Cold Pack' }
-];
-
-equipments.forEach(eq => eq.status = 'available');
-let transactions = [];
-let selectedEquipId = null;
-
-// ==========================================
-// ฟังก์ชันสลับหน้าต่าง (Tabs)
-// ==========================================
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    const ids = ['borrow','return','history'];
-    btn.classList.toggle('active', ids[i] === name);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'return') renderReturnList();
-}
-
-// ==========================================
-// 🔄 ฟังก์ชันดึงข้อมูลจาก Google Sheets (GET)
-// ==========================================
-async function pullDataFromSheet() {
-  try {
-    const res = await fetch(API_URL);
-    if (!res.ok) throw new Error('API Error');
-    const data = await res.json();
-    
-    transactions = data;
-    equipments.forEach(eq => eq.status = 'available'); // รีเซ็ตเป็นว่าง
-
-    // อัปเดตสถานะว่าชิ้นไหนถูกยืมไปแล้วบ้าง
-    transactions.forEach(t => {
-      if (t.action === 'BORROW' && !t.returnedAt) {
-        const eq = equipments.find(e => e.id === t.equipId);
-        if (eq) eq.status = 'borrowed';
-      }
-    });
-
-    document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#52c41a"></span> เชื่อมต่อฐานข้อมูลแล้ว';
-    updateUI();
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#faad14"></span> กำลังพยายามเชื่อมต่อ...';
-  }
-}
-
-// ==========================================
-// 🚀 ฟังก์ชันส่งข้อมูลเข้า Google Sheets (POST)
-// ==========================================
-async function sendDataToSheet(payload) {
-  try {
-    await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      mode: 'no-cors', // ใช้ no-cors ป้องกันปัญหาจุกจิกของ Google Apps Script
-      headers: { 'Content-Type': 'application/json' }
-    });
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
-
-// ==========================================
-// ฟังก์ชันบันทึกการ "ยืม"
-// ==========================================
-async function submitBorrow() {
-  showMsg('borrowFormMsg','','');
-  const borrowerName = document.getElementById('borrowerName').value.trim();
-  const department = document.getElementById('department').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const dueDate = document.getElementById('dueDate').value;
-  const note = document.getElementById('borrowNote').value.trim();
-
-  if (!selectedEquipId) return showMsg('borrowFormMsg','error','กรุณาเลือกอุปกรณ์');
-  if (!borrowerName || !department || !phone || !dueDate) return showMsg('borrowFormMsg','error','กรุณากรอกข้อมูลให้ครบถ้วน');
-
-  const eq = equipments.find(e => e.id === selectedEquipId);
-  const btn = document.getElementById('borrowBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึกข้อมูล...';
-
-  // สร้างไอดีการทำรายการสุ่ม
-  const transId = 'TR-' + Date.now();
-  const timestamp = new Date().toISOString();
-
-  // สร้าง Payload ตามโครงสร้างหลังบ้าน
-  const payload = {
-    action: 'WEB_BORROW',
-    transId: transId,
-    timestamp: timestamp,
-    equipId: eq.id,
-    equipName: eq.name,
-    borrowerName: borrowerName,
-    department: department,
-    phone: phone,
-    dueDate: dueDate,
-    note: note
-  };
-
-  // หลอก UI ให้ขึ้นสถานะถูกยืมไปก่อน (เพื่อความลื่นไหล)
-  eq.status = 'borrowed';
-  transactions.unshift({...payload, action: 'BORROW', returnedAt: ''});
-  updateUI();
-
-  // ส่งข้อมูลเข้า Sheet จริง
-  await sendDataToSheet(payload);
-  
-  showMsg('borrowFormMsg','success', 'บันทึกการยืมเข้า Google Sheets สำเร็จ!');
-  
-  // ล้างค่าฟอร์ม
-  document.getElementById('borrowerName').value = '';
-  document.getElementById('department').value = '';
-  document.getElementById('phone').value = '';
-  document.getElementById('borrowNote').value = '';
-  selectedEquipId = null;
-  document.getElementById('selectedEquipInfo').style.display = 'none';
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืนยันการยืม';
-  
-  setTimeout(pullDataFromSheet, 2000); // ดึงข้อมูลเช็คความชัวร์อีกรอบ
-}
-
-// ==========================================
-// ฟังก์ชันบันทึกการ "คืน"
-// ==========================================
-async function submitReturn() {
-  const checked = [...document.querySelectorAll('[id^="ret_"]:checked')].map(c => c.value);
-  if (checked.length === 0) return showMsg('returnMsg','error','กรุณาเลือกรายการที่ต้องการคืน');
-  
-  const btn = document.getElementById('returnBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
-  showMsg('returnMsg','','');
-
-  const now = new Date().toISOString();
-
-  for (const transId of checked) {
-    const t = transactions.find(x => x.transId === transId);
-    if(t) {
-      t.returnedAt = now; 
-      const eq = equipments.find(e => e.id === t.equipId);
-      if(eq) eq.status = 'available';
+    :root{
+      --bg:#131316;
+      --card-bg:#202024;
+      --card-border:#2b2b31;
+      --input-bg:#34343c;
+      --input-bg-focus:#3a3a44;
+      --input-border:#403f48;
+      --accent:#3b82f6;
+      --accent-hover:#2f6fe0;
+      --accent-soft:rgba(59,130,246,.18);
+      --text-primary:#f4f4f6;
+      --text-label:#a3a3ad;
+      --text-placeholder:#75757f;
+      --text-muted:#86868f;
+      --success:#34d399;
+      --success-bg:rgba(52,211,153,.12);
+      --error:#f87171;
+      --error-bg:rgba(248,113,113,.12);
+      --warn:#fbbf24;
+      --warn-bg:rgba(250,204,21,.12);
+      --radius-card:18px;
+      --radius-input:10px;
     }
-    const payload = { action: 'WEB_RETURN', targetTransId: transId, timestamp: now };
-    await sendDataToSheet(payload);
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:'Sarabun',sans-serif;
+      background:var(--bg);
+      background-image:radial-gradient(circle at 50% -10%, rgba(59,130,246,.10), transparent 60%);
+      color:var(--text-primary);
+      min-height:100vh;
+      display:flex;align-items:center;justify-content:center;
+      padding:32px 16px;
+    }
+    .auth-shell{width:100%;max-width:430px;}
+
+    .config-warning{
+      background:var(--warn-bg);color:var(--warn);border:1px solid rgba(250,204,21,.3);
+      padding:12px 16px;border-radius:10px;font-size:12.5px;margin-bottom:16px;
+      display:none;gap:8px;align-items:flex-start;line-height:1.5;
+    }
+    .config-warning svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;stroke:currentColor;fill:none;stroke-width:2;}
+
+    .auth-card{
+      background:var(--card-bg);
+      border:1px solid var(--card-border);
+      border-radius:var(--radius-card);
+      padding:36px 34px 32px;
+      box-shadow:0 20px 60px -20px rgba(0,0,0,.6);
+      display:none;
+      animation:fadeIn .35s ease;
+    }
+    .auth-card.active{display:block;}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+    .auth-title{
+      font-family:'Prompt',sans-serif;font-weight:700;font-size:24px;
+      text-align:center;margin-bottom:26px;letter-spacing:.2px;
+    }
+
+    .field{margin-bottom:17px;}
+    .field label{display:block;font-size:13px;font-weight:500;color:var(--text-label);margin-bottom:7px;}
+    .field label .req{color:var(--error);margin-left:2px;}
+
+    .field input[type=text],
+    .field input[type=email],
+    .field input[type=tel],
+    .field input[type=password],
+    .field select{
+      width:100%;background:var(--input-bg);border:1.5px solid var(--input-border);
+      border-radius:var(--radius-input);padding:12px 14px;font-family:'Sarabun',sans-serif;
+      font-size:14px;color:var(--text-primary);transition:border-color .15s,background .15s,box-shadow .15s;
+    }
+    .field input::placeholder{color:var(--text-placeholder);}
+    .field input:focus,.field select:focus{
+      outline:none;border-color:var(--accent);background:var(--input-bg-focus);
+      box-shadow:0 0 0 3px var(--accent-soft);
+    }
+
+    .field select{
+      appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:36px;
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a3ad' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+      background-repeat:no-repeat;background-position:right 14px center;background-size:14px;
+    }
+    .field select:invalid{color:var(--text-placeholder);}
+
+    .dob-wrap{position:relative;}
+    .dob-wrap input[type=text]{padding-right:44px;}
+    .dob-icon-btn{
+      position:absolute;right:6px;top:50%;transform:translateY(-50%);
+      width:32px;height:32px;border:none;background:transparent;color:var(--text-label);
+      display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:7px;
+    }
+    .dob-icon-btn:hover{background:rgba(255,255,255,.06);color:var(--accent);}
+    .dob-icon-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;}
+    .dob-native{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;}
+
+    .btn-submit{
+      width:100%;margin-top:6px;padding:13px;border:none;border-radius:var(--radius-input);
+      background:var(--accent);color:#fff;font-family:'Prompt',sans-serif;font-weight:600;font-size:15px;
+      cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+      transition:background .15s,transform .05s;
+    }
+    .btn-submit:hover{background:var(--accent-hover);}
+    .btn-submit:active{transform:scale(.98);}
+    .btn-submit:disabled{opacity:.65;cursor:default;}
+
+    .switch-link{text-align:center;margin-top:20px;font-size:13px;color:var(--text-muted);}
+    .switch-link a{color:var(--accent);font-weight:500;cursor:pointer;text-decoration:none;}
+    .switch-link a:hover{text-decoration:underline;}
+
+    .alert{padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:16px;display:flex;gap:8px;align-items:flex-start;line-height:1.5;}
+    .alert svg{width:16px;height:16px;flex-shrink:0;margin-top:1px;}
+    .alert-success{background:var(--success-bg);color:var(--success);}
+    .alert-error{background:var(--error-bg);color:var(--error);}
+
+    .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;display:inline-block;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    .welcome-icon{width:56px;height:56px;border-radius:50%;background:var(--success-bg);color:var(--success);
+      display:flex;align-items:center;justify-content:center;margin:0 auto 18px;}
+    .welcome-icon svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:2;}
+    .welcome-sub{text-align:center;color:var(--text-muted);font-size:13px;margin-bottom:6px;}
+    .welcome-name{text-align:center;font-family:'Prompt',sans-serif;font-weight:600;font-size:18px;margin-bottom:28px;}
+
+    @media (max-width:480px){ .auth-card{padding:28px 22px 26px;} }
+  </style>
+  </head>
+  <body>
+
+  <div class="auth-shell">
+
+    <div class="config-warning" id="configWarning">
+      <svg viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+      <span>ยังไม่ได้ตั้งค่า API_URL — เปิดไฟล์นี้แล้วใส่ลิงก์ Web App จาก Google Apps Script ในตัวแปร <code>API_URL</code> ก่อนใช้งานจริง (ดูวิธีตั้งค่าด้านล่างไฟล์ Code.gs)</span>
+    </div>
+
+    <!-- ===================== หน้าเข้าสู่ระบบ ===================== -->
+    <div class="auth-card active" id="loginCard">
+      <h2 class="auth-title">เข้าสู่ระบบ</h2>
+      <div id="loginAlert"></div>
+      <form id="loginForm" onsubmit="handleLogin(event)" novalidate>
+        <div class="field">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" id="loginUsername" placeholder="กรอก Username ของคุณ" autocomplete="username">
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน <span class="req">*</span></label>
+          <input type="password" id="loginPassword" placeholder="กรอกรหัสผ่าน" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label>อีเมล <span class="req">*</span></label>
+          <input type="email" id="loginEmail" placeholder="กรอกอีเมลของคุณ" autocomplete="email">
+        </div>
+        <button type="submit" class="btn-submit" id="loginBtn">ล็อคอิน</button>
+      </form>
+      <div class="switch-link">ยังไม่มีบัญชีใช่ไหม? <a onclick="switchView('register')">สมัครสมาชิกที่นี่</a></div>
+    </div>
+
+    <!-- ===================== หน้าหลังเข้าสู่ระบบสำเร็จ ===================== -->
+    <div class="auth-card" id="welcomeCard">
+      <div class="welcome-icon"><svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg></div>
+      <h2 class="auth-title" style="margin-bottom:8px;">เข้าสู่ระบบสำเร็จ</h2>
+      <p class="welcome-sub">ยินดีต้อนรับ</p>
+      <p class="welcome-name" id="welcomeName"></p>
+      <button class="btn-submit" onclick="switchView('login')">ออกจากระบบ</button>
+    </div>
+
+    <!-- ===================== หน้าสมัครสมาชิก ===================== -->
+    <div class="auth-card" id="registerCard">
+      <h2 class="auth-title">สมัครสมาชิก</h2>
+      <div id="registerAlert"></div>
+      <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+        <div class="field">
+          <label>คำนำหน้า <span class="req">*</span></label>
+          <select id="regTitle" required>
+            <option value="" disabled selected>เลือกคำนำหน้า (ตามเพศกำเนิด)</option>
+            <option value="นาย">นาย</option>
+            <option value="นางสาว">นางสาว</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>ชื่อ - นามสกุล <span class="req">*</span></label>
+          <input type="text" id="regFullName" placeholder="กรอกชื่อของคุณ" autocomplete="name">
+        </div>
+        <div class="field">
+          <label>วัน/เดือน/ปีเกิด <span class="req">*</span></label>
+          <div class="dob-wrap">
+            <input type="text" id="regDOBText" placeholder="วว/ดด/ปปปป" inputmode="numeric" maxlength="10" oninput="formatDOB(event)">
+            <button type="button" class="dob-icon-btn" onclick="openDOBPicker()" aria-label="เลือกวันที่จากปฏิทิน">
+              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+            </button>
+            <input type="date" id="regDOBPicker" class="dob-native" tabindex="-1" onchange="syncDOBFromPicker(event)">
+          </div>
+        </div>
+        <div class="field">
+          <label>เบอร์โทร <span class="req">*</span></label>
+          <input type="tel" id="regPhone" placeholder="เช่น 0812345678" inputmode="numeric" maxlength="10">
+        </div>
+        <div class="field">
+          <label>อีเมล <span class="req">*</span></label>
+          <input type="email" id="regEmail" placeholder="กรอกอีเมลที่ใช้งานจริง" autocomplete="email">
+        </div>
+        <div class="field">
+          <label>Username <span class="req">*</span></label>
+          <input type="text" id="regUsername" placeholder="ตั้งชื่อผู้ใช้สำหรับเข้าสู่ระบบ" autocomplete="username">
+        </div>
+        <div class="field">
+          <label>รหัสผ่าน <span class="req">*</span></label>
+          <input type="password" id="regPassword" placeholder="ตั้งรหัสผ่าน" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label>ยืนยันรหัสผ่าน <span class="req">*</span></label>
+          <input type="password" id="regConfirmPassword" placeholder="ยืนยันรหัสผ่าน" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-submit" id="registerBtn">สมัครสมาชิก</button>
+      </form>
+      <div class="switch-link">มีบัญชีอยู่แล้ว? <a onclick="switchView('login')">เข้าสู่ระบบที่นี่</a></div>
+    </div>
+
+  </div>
+
+  <script>
+  // ==========================================================
+  // ⚙️ ตั้งค่าหลัก — ใส่ลิงก์ Web App จาก Google Apps Script ตรงนี้
+  // (วิธีหา: Deploy > New deployment > Web app > คัดลอก URL ที่ได้)
+  // ==========================================================
+  const API_URL = 'https://script.google.com/macros/s/AKfycbwGslpfnrsMlXgJKzG4lyU_KO5PADFUGDbIkqGx44-qh_HXTvgpDYl_x1bpWDrSG_Wm-Q/exec';
+
+  function checkConfig(){
+    if (API_URL.includes('PUT_YOUR_')) {
+      document.getElementById('configWarning').style.display = 'flex';
+    }
+  }
+  checkConfig();
+
+  // ----------------------------------------------------------
+  // สลับการ์ด (ล็อคอิน / สมัครสมาชิก / ยินดีต้อนรับ)
+  // ----------------------------------------------------------
+  function switchView(view){
+    ['loginCard','registerCard','welcomeCard'].forEach(id => document.getElementById(id).classList.remove('active'));
+    const map = { login:'loginCard', register:'registerCard', welcome:'welcomeCard' };
+    document.getElementById(map[view]).classList.add('active');
+    showAlert('loginAlert','','');
+    showAlert('registerAlert','','');
   }
 
-  updateUI();
-  showMsg('returnMsg','success', `บันทึกการคืนอุปกรณ์สำเร็จ`);
-  
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg> ยืนยันการคืนที่เลือก';
-  setTimeout(pullDataFromSheet, 2000);
-}
-
-// ==========================================
-// ส่วนแสดงผล UI ต่างๆ
-// ==========================================
-function updateUI() {
-  const total = equipments.length;
-  const avail = equipments.filter(e => e.status === 'available').length;
-  const borrowed = total - avail;
-  
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAvail').textContent = avail;
-  document.getElementById('statBorrowed').textContent = borrowed;
-  document.getElementById('statToday').textContent = transactions.length;
-
-  renderEquipGrid();
-  renderReturnList();
-  renderHistory();
-}
-
-function renderEquipGrid() {
-  const grid = document.getElementById('equipGrid');
-  grid.innerHTML = equipments.map(e => {
-    const isSel = e.id === selectedEquipId ? ' selected' : '';
-    const isBor = e.status === 'borrowed';
-    return `
-      <div class="equip-card${isSel}${isBor ? ' borrowed' : ''}" onclick="${isBor ? '' : `selectEquip('${e.id}')`}">
-        <div class="equip-name">${e.name}</div>
-        <div class="equip-id">${e.id}</div>
-        ${isBor ? '<span class="equip-status borrowed"><span class="equip-status-dot"></span>ถูกยืมอยู่</span>' 
-                : '<span class="equip-status available"><span class="equip-status-dot"></span>พร้อมให้ยืม</span>'}
-      </div>
-    `;
-  }).join('');
-}
-
-function selectEquip(id) {
-  selectedEquipId = id;
-  const eq = equipments.find(e => e.id === id);
-  const info = document.getElementById('selectedEquipInfo');
-  info.style.display = 'block';
-  info.innerHTML = '<strong>เลือกอุปกรณ์:</strong> ' + eq.name + ' (' + eq.id + ')';
-  renderEquipGrid();
-}
-
-function renderReturnList() {
-  const borrowed = transactions.filter(t => t.action === 'BORROW' && !t.returnedAt);
-  const el = document.getElementById('returnList');
-  if (borrowed.length === 0) {
-    el.innerHTML = '<div style="color:var(--gray-400);padding:12px 0">ขณะนี้ไม่มีอุปกรณ์ค้างคืนในระบบ</div>';
-    return;
+  function showAlert(elId, type, msg){
+    const el = document.getElementById(elId);
+    if (!msg) { el.innerHTML = ''; return; }
+    const icon = type === 'success'
+      ? '<path d="M5 12l5 5L20 7"/>'
+      : '<path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>';
+    el.innerHTML = `<div class="alert alert-${type}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icon}</svg><span>${msg}</span></div>`;
   }
-  el.innerHTML = `<div style="overflow-x:auto"><table><thead><tr><th>เลือก</th><th>รหัส</th><th>วันที่ยืม</th><th>อุปกรณ์</th><th>ผู้ยืม</th><th>กำหนดคืน</th></tr></thead><tbody>` + 
-  borrowed.map(t => `
-    <tr>
-      <td><input type="checkbox" id="ret_${t.transId}" value="${t.transId}" style="width:16px;height:16px;cursor:pointer;"></td>
-      <td style="font-size:11px;color:#888">${t.transId.substring(0,8)}..</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td><span class="badge badge-borrowed">${t.dueDate}</span></td>
-    </tr>
-  `).join('') + `</tbody></table></div>`;
-}
 
-function renderHistory() {
-  const search = document.getElementById('searchHistory').value.toLowerCase();
-  const filter = document.getElementById('filterStatus').value;
-  let list = [...transactions];
-  
-  if (search) list = list.filter(t => t.borrowerName.toLowerCase().includes(search) || t.equipName.toLowerCase().includes(search));
-  if (filter) list = list.filter(t => filter === 'BORROW' ? !t.returnedAt : t.returnedAt);
-
-  const tbody = document.getElementById('historyTbody');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">ไม่พบรายการ</td></tr>';
-    return;
+  // ----------------------------------------------------------
+  // เรียก API (ใช้ Content-Type: text/plain เพื่อเลี่ยงปัญหา CORS preflight ของ Apps Script)
+  // ----------------------------------------------------------
+  async function callAPI(payload){
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
   }
-  
-  tbody.innerHTML = list.map(t => {
-    const isRet = !!t.returnedAt;
-    const badge = isRet ? 'badge-returned">คืนแล้ว' : 'badge-borrowed">กำลังยืม';
-    return `<tr>
-      <td style="font-size:11px;color:#888">${t.transId.substring(0,8)}..</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td>${t.department}</td>
-      <td>${t.dueDate}</td>
-      <td><span class="badge ${badge}</span></td>
-    </tr>`;
-  }).join('');
-}
 
-function showMsg(elId, type, msg) {
-  const el = document.getElementById(elId);
-  if (!msg) { el.innerHTML = ''; return; }
-  const icon = type === 'success' ? '<path d="M5 12l5 5L20 7"/>' : '<path d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>';
-  el.innerHTML = `<div class="alert alert-${type}"><svg viewBox="0 0 24 24">${icon}</svg><span>${msg}</span></div>`;
-}
+  // ----------------------------------------------------------
+  // วัน/เดือน/ปีเกิด: จัดรูปแบบอัตโนมัติ + เชื่อมกับปฏิทินของเบราว์เซอร์
+  // ----------------------------------------------------------
+  function formatDOB(e){
+    let digits = e.target.value.replace(/\D/g,'').slice(0,8);
+    let out = digits.slice(0,2);
+    if (digits.length > 2) out += '/' + digits.slice(2,4);
+    if (digits.length > 4) out += '/' + digits.slice(4,8);
+    e.target.value = out;
+  }
 
-// ตั้งวันที่เริ่มต้นอัตโนมัติ
-const d = new Date(); d.setDate(d.getDate() + 3);
-document.getElementById('dueDate').value = d.toISOString().split('T')[0];
+  function openDOBPicker(){
+    const picker = document.getElementById('regDOBPicker');
+    if (picker.showPicker) { try { picker.showPicker(); } catch(err) { picker.focus(); } }
+    else picker.focus();
+  }
 
-// เริ่มทำงานเมื่อเปิดเว็บ
-updateUI();
-pullDataFromSheet();
-setInterval(pullDataFromSheet, 3000); // อัปเดตตารางและสถานะอัตโนมัติ ทุกๆ 3 วินาที
-</script>
-</body>
-</html>
+  function syncDOBFromPicker(e){
+    const val = e.target.value; // yyyy-mm-dd
+    if (!val) return;
+    const [y,m,d] = val.split('-');
+    document.getElementById('regDOBText').value = `${d}/${m}/${y}`;
+  }
+
+  function parseDOBToISO(text){
+    const m = text.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return null;
+    const [, d, mo, y] = m;
+    const day = parseInt(d,10), month = parseInt(mo,10), year = parseInt(y,10);
+    if (month < 1 || month > 12) return null;
+    const daysInMonth = new Date(year, month, 0).getDate();
+    if (day < 1 || day > daysInMonth) return null;
+    if (year < 1900 || year > new Date().getFullYear()) return null;
+    return `${y}-${mo}-${d}`;
+  }
+
+  // ----------------------------------------------------------
+  // ตัวช่วยตรวจสอบข้อมูล
+  // ----------------------------------------------------------
+  function isValidUsername(v){ return /^[A-Za-z0-9_]{4,20}$/.test(v); }
+  function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+  function isValidPhone(v){ return /^0\d{8,9}$/.test(v); }
+
+  // ----------------------------------------------------------
+  // สมัครสมาชิก
+  // ----------------------------------------------------------
+  async function handleRegister(e){
+    e.preventDefault();
+    showAlert('registerAlert','','');
+
+    const title = document.getElementById('regTitle').value;
+    const fullName = document.getElementById('regFullName').value.trim();
+    const dobText = document.getElementById('regDOBText').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirmPassword = document.getElementById('regConfirmPassword').value;
+
+    if (!title || !fullName || !dobText || !phone || !email || !username || !password || !confirmPassword) {
+      return showAlert('registerAlert','error','กรุณากรอกข้อมูลให้ครบทุกช่อง');
+    }
+    if (!isValidUsername(username)) {
+      return showAlert('registerAlert','error','Username ต้องมี 4-20 ตัวอักษร เป็นภาษาอังกฤษ ตัวเลข หรือ _ เท่านั้น');
+    }
+    const dobISO = parseDOBToISO(dobText);
+    if (!dobISO) {
+      return showAlert('registerAlert','error','รูปแบบวัน/เดือน/ปีเกิดไม่ถูกต้อง กรุณากรอกเป็น วว/ดด/ปปปป');
+    }
+    if (!isValidPhone(phone)) {
+      return showAlert('registerAlert','error','กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง เช่น 0812345678');
+    }
+    if (!isValidEmail(email)) {
+      return showAlert('registerAlert','error','กรุณากรอกอีเมลให้ถูกต้อง');
+    }
+    if (password.length < 6) {
+      return showAlert('registerAlert','error','รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+    }
+    if (password !== confirmPassword) {
+      return showAlert('registerAlert','error','รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน');
+    }
+
+    const btn = document.getElementById('registerBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> กำลังสมัครสมาชิก...';
+
+    try {
+      const result = await callAPI({ action:'REGISTER', username, title, fullName, dob: dobISO, phone, email, password });
+      if (result.success) {
+        showAlert('registerAlert','success', result.message || 'สมัครสมาชิกสำเร็จ กำลังพาไปหน้าเข้าสู่ระบบ...');
+        document.getElementById('registerForm').reset();
+        setTimeout(() => switchView('login'), 1600);
+      } else {
+        showAlert('registerAlert','error', result.message || 'สมัครสมาชิกไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+      }
+    } catch (err) {
+      showAlert('registerAlert','error','เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาตรวจสอบ API_URL หรือลองใหม่อีกครั้ง');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'สมัครสมาชิก';
+  }
+
+  // ----------------------------------------------------------
+  // เข้าสู่ระบบ
+  // ----------------------------------------------------------
+  async function handleLogin(e){
+    e.preventDefault();
+    showAlert('loginAlert','','');
+
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const email = document.getElementById('loginEmail').value.trim();
+
+    if (!username || !password || !email) {
+      return showAlert('loginAlert','error','กรุณากรอกข้อมูลให้ครบทุกช่อง');
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> กำลังเข้าสู่ระบบ...';
+
+    try {
+      const result = await callAPI({ action:'LOGIN', username, password, email });
+      if (result.success) {
+        document.getElementById('welcomeName').textContent = `${result.user.title}${result.user.fullName}`;
+        document.getElementById('loginForm').reset();
+        switchView('welcome');
+      } else {
+        showAlert('loginAlert','error', result.message || 'เข้าสู่ระบบไม่สำเร็จ');
+      }
+    } catch (err) {
+      showAlert('loginAlert','error','เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ กรุณาตรวจสอบ API_URL หรือลองใหม่อีกครั้ง');
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = 'ล็อคอิน';
+  }
+  </script>
+  </body>
+  </html>
