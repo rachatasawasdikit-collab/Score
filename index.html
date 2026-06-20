@@ -75,6 +75,7 @@
   .btn-damaged { background: var(--red-50); color: var(--red-600); border: 1px solid var(--red-600); }
   .btn { padding: 10px 24px; border: none; border-radius: 7px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.1s; }
   .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .btn-primary { background: var(--blue-800); color: #fff; }
   .btn-success { background: var(--teal-600); color: #fff; }
   .btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
@@ -85,6 +86,8 @@
   .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
   .badge-borrowed { background: var(--amber-50); color: var(--amber-600); }
   .badge-returned { background: var(--green-50); color: var(--green-600); }
+  .badge-damaged { background: var(--red-50); color: var(--red-600); }
+  .badge-repaired { background: var(--blue-50); color: var(--blue-600); }
   .badge-overdue { background: var(--red-50); color: var(--red-600); }
   .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
   .alert svg { width: 18px; height: 18px; stroke: currentColor; fill: none; margin-top: 1px; }
@@ -112,9 +115,6 @@
 </head>
 <body>
 
-<!-- ==========================================
-     หน้าจอเข้าสู่ระบบ / สมัครสมาชิก
-========================================== -->
 <div id="loginScreen">
   <div class="login-card">
     <div class="login-logo-row">
@@ -127,7 +127,6 @@
       </div>
     </div>
 
-    <!-- ฟอร์มเข้าสู่ระบบ -->
     <form class="auth-form active" id="loginForm" onsubmit="return doLogin(event)">
       <div class="form-group">
         <label class="form-label">ชื่อผู้ใช้งาน <span class="req">*</span></label>
@@ -144,7 +143,6 @@
       <div class="auth-toggle">ยังไม่มีบัญชี?<button type="button" onclick="toggleAuthMode('register')">สมัครสมาชิก</button></div>
     </form>
 
-    <!-- ฟอร์มสมัครสมาชิก -->
     <form class="auth-form" id="registerForm" onsubmit="return doRegister(event)">
       <div class="form-group">
         <label class="form-label">ชื่อ-นามสกุล <span class="req">*</span></label>
@@ -179,9 +177,6 @@
   </div>
 </div>
 
-<!-- ==========================================
-     ตัวระบบหลัก (ซ่อนไว้จนกว่าจะเข้าสู่ระบบสำเร็จ)
-========================================== -->
 <div id="appRoot" style="display:none">
 
 <header>
@@ -274,20 +269,10 @@
   </div>
 
   <div class="tab-panel" id="tab-admin">
-    <div class="grid-2" style="margin-bottom:24px">
-      <div class="card">
-        <div class="card-title"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> เพิ่มอุปกรณ์ใหม่</div>
-        <div class="form-group"><label class="form-label">รหัสอุปกรณ์ <span class="req">*</span></label><input type="text" class="form-control" id="newEquipId" placeholder="เช่น PT-011" /></div>
-        <div class="form-group"><label class="form-label">ชื่ออุปกรณ์ <span class="req">*</span></label><input type="text" class="form-control" id="newEquipName" placeholder="เช่น เครื่องดึงหลัง (Traction)" /></div>
-        <div class="form-group"><label class="form-label">จำนวน (ชิ้น) <span class="req">*</span></label><input type="number" class="form-control" id="newEquipQty" min="1" value="5" /></div>
-        <div id="adminAddMsg"></div>
-        <button class="btn btn-primary" onclick="adminAddEquipment()" style="width:100%; justify-content:center; margin-top:4px"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> เพิ่มอุปกรณ์</button>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M5.5 4.5l13 13M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> สถานะการใช้งานอุปกรณ์</div>
-        <div id="adminEquipStatusList"></div>
-      </div>
+    <div class="card" style="margin-bottom:24px">
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M5.5 4.5l13 13M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> สถานะการชำรุดของอุปกรณ์</div>
+      <p style="font-size:12px; color:var(--gray-600); margin-bottom:16px;">รายการอุปกรณ์และจำนวนรวมตั้งค่าไว้ในโค้ดหน้าเว็บ กดปุ่ม "+ แจ้งชำรุด" เพื่อหักจำนวนพร้อมใช้งานลง 1 ชิ้น (บันทึกแถวลงชีตยืม-คืน) หรือกด "−" เพื่อยกเลิกการแจ้งชำรุด 1 ชิ้น</p>
+      <div id="adminEquipStatusList"></div>
     </div>
 
     <div class="card">
@@ -302,80 +287,59 @@
   </div>
 
 </div>
-</div><!-- /#appRoot -->
-
-<script>
+</div><script>
 // ==========================================
 // ส่วนตั้งค่าระบบหลัก
 // ==========================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbw8QN2P_0I8wN7i-aNW3Debpf8Ed134Go7ZFqCq_FDxnq2LKcgx5w2lrnKm-G1iy95LPQ/exec';
+// แก้ไขลิงก์ API_URL เป็นของใหม่แล้ว
+const API_URL = 'https://script.google.com/macros/s/AKfycbyN6dPiu1GAaenJ3YoUH_oW-lhqsfEoTfoC3q78OjS9tuGYu1nAALZyQ88maoeLDFhRpg/exec';
 
-// 🔑 บัญชีแอดมิน (ฝังไว้ในเว็บ) — เปลี่ยนรหัสผ่านตรงนี้ก่อนใช้งานจริง!
-// เข้าสู่ระบบด้วยชื่อผู้ใช้งาน/รหัสผ่านคู่นี้ในหน้าล็อกอินปกติ จะได้สิทธิ์แอดมินอัตโนมัติ
 const ADMIN_USERNAME = 'PT001';
 const ADMIN_PASSWORD = 'PT002';
 
-// 📋 รายการอุปกรณ์ตั้งต้น (เพิ่ม-ลด ได้ที่นี่เลยครับ)
-// qty = จำนวนชิ้นที่มีของอุปกรณ์แต่ละประเภท (ค่าเริ่มต้น 5 ชิ้นต่อรายการ)
-// condition = 'ok' (พร้อมใช้งาน) หรือ 'damaged' (ชำรุด — งดให้ยืมทั้งรายการจนกว่าแอดมินจะปรับกลับ)
 const equipments = [
-  { id: 'PT-001', name: 'เครื่อง TENS (กระตุ้นไฟฟ้า)', qty: 5, condition: 'ok' },
-  { id: 'PT-002', name: 'เครื่อง Ultrasound Therapy', qty: 5, condition: 'ok' },
-  { id: 'PT-003', name: 'เครื่อง Infrared Lamp', qty: 5, condition: 'ok' },
-  { id: 'PT-004', name: 'ไม้เท้า 4 ขา (Quad Cane)', qty: 5, condition: 'ok' },
-  { id: 'PT-005', name: 'Walker มาตรฐาน', qty: 5, condition: 'ok' },
-  { id: 'PT-006', name: 'ไม้ค้ำยัน (Axillary Crutch)', qty: 5, condition: 'ok' },
-  { id: 'PT-007', name: 'Theraband (ยางยืด)', qty: 5, condition: 'ok' },
-  { id: 'PT-008', name: 'ลูกบอลกายภาพ (Exercise Ball)', qty: 5, condition: 'ok' },
-  { id: 'PT-009', name: 'เครื่องวัดองศาข้อต่อ (Goniometer)', qty: 5, condition: 'ok' },
-  { id: 'PT-010', name: 'เครื่อง Hot / Cold Pack', qty: 5, condition: 'ok' }
+  { id: 'PT-001', name: 'เครื่อง TENS (กระตุ้นไฟฟ้า)', qty: 5 },
+  { id: 'PT-002', name: 'เครื่อง Ultrasound Therapy', qty: 5 },
+  { id: 'PT-003', name: 'เครื่อง Infrared Lamp', qty: 5 },
+  { id: 'PT-004', name: 'ไม้เท้า 4 ขา (Quad Cane)', qty: 5 },
+  { id: 'PT-005', name: 'Walker มาตรฐาน', qty: 5 },
+  { id: 'PT-006', name: 'ไม้ค้ำยัน (Axillary Crutch)', qty: 5 },
+  { id: 'PT-007', name: 'Theraband (ยางยืด)', qty: 5 },
+  { id: 'PT-008', name: 'ลูกบอลกายภาพ (Exercise Ball)', qty: 5 },
+  { id: 'PT-009', name: 'เครื่องวัดองศาข้อต่อ (Goniometer)', qty: 5 },
+  { id: 'PT-010', name: 'เครื่อง Hot / Cold Pack', qty: 5 }
 ];
 
 let transactions = [];
 let selectedEquipId = null;
 let pollHandle = null;
-let currentRole = 'staff'; // 'staff' หรือ 'admin'
+let currentRole = 'staff';
+let isUpdating = false; // ตัวแปรล็อกเพื่อกันข้อมูลกระพริบ
 
-// ==========================================
-// 🔐 ส่วนเข้าสู่ระบบ / สมัครสมาชิก
-// หมายเหตุ: ส่วนนี้เป็นแค่โครง UI + การตรวจสอบฟอร์มเบื้องต้นเท่านั้น
-// ให้ไปต่อ API เข้าสู่ระบบ/สมัครสมาชิกของคุณเองตรงจุดที่มีคอมเมนต์ TODO ด้านล่าง
-// ==========================================
 function toggleAuthMode(mode) {
   document.getElementById('loginForm').classList.toggle('active', mode === 'login');
   document.getElementById('registerForm').classList.toggle('active', mode === 'register');
-  showMsg('loginMsg','',''); showMsg('registerMsg','','');
+  showMsg('loginMsg','','');
+  showMsg('registerMsg','','');
 }
 
 async function doLogin(evt) {
   evt.preventDefault();
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
-
   if (!username || !password) {
     showMsg('loginMsg','error','กรุณากรอกชื่อผู้ใช้งานและรหัสผ่าน');
     return false;
   }
-
   const btn = document.getElementById('loginBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> กำลังเข้าสู่ระบบ...';
 
-  // TODO: เรียก API เข้าสู่ระบบของคุณที่นี่ เช่น
-  // const res = await fetch('/api/login', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ username, password })
-  // });
-  // if (!res.ok) { showMsg('loginMsg','error','ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง'); btn.disabled = false; btn.innerHTML = '...'; return false; }
-
-  // ตรวจสอบบัญชีแอดมิน (ฝังไว้ในเว็บ) — ถ้าตรงกันจะได้สิทธิ์แอดมิน ไม่ตรงจะเข้าเป็นผู้ใช้งานทั่วไป
   const isAdmin = (username === ADMIN_USERNAME && password === ADMIN_PASSWORD);
-
   enterApp(username, isAdmin);
+  
   btn.disabled = false;
   btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg> เข้าสู่ระบบ';
-
   return false;
 }
 
@@ -396,342 +360,301 @@ async function doRegister(evt) {
     showMsg('registerMsg','error','รหัสผ่านทั้งสองช่องไม่ตรงกัน');
     return false;
   }
-
   const btn = document.getElementById('registerBtn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> กำลังสมัครสมาชิก...';
 
-  // TODO: เรียก API สมัครสมาชิกของคุณที่นี่ เช่น
-  // const res = await fetch('/api/register', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ fullname, username, email, phone, password: pw1 })
-  // });
-  // if (!res.ok) { showMsg('registerMsg','error','สมัครสมาชิกไม่สำเร็จ'); btn.disabled = false; btn.innerHTML = '...'; return false; }
-
-  showMsg('registerMsg','success','สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ');
-  document.getElementById('loginUsername').value = username;
-  document.getElementById('regFullname').value = '';
-  document.getElementById('regUsername').value = '';
-  document.getElementById('regEmail').value = '';
-  document.getElementById('regPhone').value = '';
-  document.getElementById('regPassword').value = '';
-  document.getElementById('regPassword2').value = '';
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6"/></svg> สมัครสมาชิก';
-  toggleAuthMode('login');
+  setTimeout(() => {
+    showMsg('registerMsg','success','สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ');
+    btn.disabled = false;
+    btn.innerHTML = 'สมัครสมาชิก';
+    document.getElementById('registerForm').reset();
+    setTimeout(() => toggleAuthMode('login'), 1500);
+  }, 1000);
 
   return false;
 }
 
 function enterApp(username, isAdmin) {
-  currentRole = isAdmin ? 'admin' : 'staff';
-
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appRoot').style.display = 'block';
-  document.getElementById('userPillName').textContent = username;
-  document.getElementById('adminPill').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('userPillName').innerText = username;
+  currentRole = isAdmin ? 'admin' : 'staff';
   document.getElementById('adminTabBtn').style.display = isAdmin ? 'flex' : 'none';
-  document.getElementById('loginUsername').value = '';
-  document.getElementById('loginPassword').value = '';
-  showMsg('loginMsg','','');
-
-  // ล็อกอินปกติ -> พาไปหน้า "ยืมอุปกรณ์" ทันที (ทั้งผู้ใช้งานทั่วไปและแอดมิน)
+  document.getElementById('adminPill').style.display = isAdmin ? 'flex' : 'none';
+  
+  startPolling();
   switchTab('borrow');
-
-  // เริ่มระบบหลัก (โหลดข้อมูลและซิงก์กับ Google Sheets) เฉพาะครั้งแรกที่เข้าใช้งาน
-  if (!pollHandle) {
-    updateUI();
-    pullDataFromSheet();
-    pollHandle = setInterval(pullDataFromSheet, 3000);
-  }
 }
 
 function logout() {
-  currentRole = 'staff';
-  document.getElementById('appRoot').style.display = 'none';
+  stopPolling();
+  document.getElementById('loginForm').reset();
+  showMsg('loginMsg','','');
   document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('adminPill').style.display = 'none';
-  document.getElementById('adminTabBtn').style.display = 'none';
-  toggleAuthMode('login');
+  document.getElementById('appRoot').style.display = 'none';
 }
 
-// ==========================================
-// ฟังก์ชันสลับหน้าต่าง (Tabs)
-// ==========================================
-function switchTab(name) {
-  if (name === 'admin' && currentRole !== 'admin') return; // กันผู้ใช้งานทั่วไปสลับเข้าแท็บแอดมิน
-
-  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
-    const ids = ['borrow','return','history','admin'];
-    btn.classList.toggle('active', ids[i] === name);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'return') renderReturnList();
-  if (name === 'admin') { renderAdminEquipStatus(); renderAdminBorrowers(); }
+function updateUI() {
+  renderEquipGrid();
+  renderReturnList();
+  renderHistory();
+  if (currentRole === 'admin') {
+    renderAdminBorrowers();
+    renderAdminEquipStatusList();
+  }
+  updateStats();
 }
 
-// ==========================================
-// 📦 ฟังก์ชันคำนวณจำนวนคงเหลือของอุปกรณ์แต่ละชนิด
-// ==========================================
-function getBorrowedCount(equipId) {
-  return transactions.filter(t => t.equipId === equipId && t.action === 'BORROW' && !t.returnedAt).length;
-}
-function getAvailableQty(eq) {
-  if (eq.condition === 'damaged') return 0;
-  return Math.max(0, eq.qty - getBorrowedCount(eq.id));
-}
-
-// ==========================================
-// 🔄 ฟังก์ชันดึงข้อมูลจาก Google Sheets (GET)
-// ==========================================
 async function pullDataFromSheet() {
+  if (isUpdating) return; // หากมีการแก้ไขข้อมูล ให้หยุดดึงข้อมูลชั่วคราว
   try {
     const res = await fetch(API_URL);
     if (!res.ok) throw new Error('API Error');
     const data = await res.json();
-
     transactions = data;
-
     document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#52c41a"></span> เชื่อมต่อฐานข้อมูลแล้ว';
     updateUI();
-
   } catch (err) {
     console.error(err);
     document.getElementById('syncLabel').innerHTML = '<span class="sync-dot" style="background:#faad14"></span> กำลังพยายามเชื่อมต่อ...';
   }
 }
 
-// ==========================================
-// 🚀 ฟังก์ชันส่งข้อมูลเข้า Google Sheets (POST)
-// ==========================================
 async function sendDataToSheet(payload) {
+  isUpdating = true; // ล็อกระบบกันกระพริบ
   try {
     await fetch(API_URL, {
       method: 'POST',
       body: JSON.stringify(payload),
-      mode: 'no-cors', // ใช้ no-cors ป้องกันปัญหาจุกจิกของ Google Apps Script
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' }
     });
+    isUpdating = false;
     return true;
   } catch (err) {
+    isUpdating = false;
     return false;
   }
 }
 
-// ==========================================
-// ฟังก์ชันบันทึกการ "ยืม"
-// ==========================================
-async function submitBorrow() {
-  showMsg('borrowFormMsg','','');
-  const borrowerName = document.getElementById('borrowerName').value.trim();
-  const department = document.getElementById('department').value.trim();
-  const phone = document.getElementById('phone').value.trim();
-  const dueDate = document.getElementById('dueDate').value;
-  const note = document.getElementById('borrowNote').value.trim();
-
-  if (!selectedEquipId) return showMsg('borrowFormMsg','error','กรุณาเลือกอุปกรณ์');
-  if (!borrowerName || !department || !phone || !dueDate) return showMsg('borrowFormMsg','error','กรุณากรอกข้อมูลให้ครบถ้วน');
-
-  const eq = equipments.find(e => e.id === selectedEquipId);
-  if (getAvailableQty(eq) <= 0) {
-    selectedEquipId = null;
-    document.getElementById('selectedEquipInfo').style.display = 'none';
-    renderEquipGrid();
-    return showMsg('borrowFormMsg','error','อุปกรณ์ชิ้นนี้ถูกยืมครบจำนวนแล้ว กรุณาเลือกชิ้นอื่น');
-  }
-
-  const btn = document.getElementById('borrowBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึกข้อมูล...';
-
-  // สร้างไอดีการทำรายการสุ่ม
-  const transId = 'TR-' + Date.now();
-  const timestamp = new Date().toISOString();
-
-  // สร้าง Payload ตามโครงสร้างหลังบ้าน
-  const payload = {
-    action: 'WEB_BORROW',
-    transId: transId,
-    timestamp: timestamp,
-    equipId: eq.id,
-    equipName: eq.name,
-    borrowerName: borrowerName,
-    department: department,
-    phone: phone,
-    dueDate: dueDate,
-    note: note
-  };
-
-  // หลอก UI ให้ขึ้นสถานะถูกยืมไปก่อน (เพื่อความลื่นไหล)
-  transactions.unshift({...payload, action: 'BORROW', returnedAt: ''});
-  updateUI();
-
-  // ส่งข้อมูลเข้า Sheet จริง
-  await sendDataToSheet(payload);
-
-  showMsg('borrowFormMsg','success', 'บันทึกการยืมเข้า Google Sheets สำเร็จ!');
-
-  // ล้างค่าฟอร์ม
-  document.getElementById('borrowerName').value = '';
-  document.getElementById('department').value = '';
-  document.getElementById('phone').value = '';
-  document.getElementById('borrowNote').value = '';
-  selectedEquipId = null;
-  document.getElementById('selectedEquipInfo').style.display = 'none';
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืนยันการยืม';
-
-  setTimeout(pullDataFromSheet, 2000); // ดึงข้อมูลเช็คความชัวร์อีกรอบ
+function startPolling() {
+  pullDataFromSheet();
+  pollHandle = setInterval(pullDataFromSheet, 3000);
 }
 
-// ==========================================
-// ฟังก์ชันบันทึกการ "คืน"
-// ==========================================
-async function submitReturn() {
-  const checked = [...document.querySelectorAll('[id^="ret_"]:checked')].map(c => c.value);
-  if (checked.length === 0) return showMsg('returnMsg','error','กรุณาเลือกรายการที่ต้องการคืน');
-
-  const btn = document.getElementById('returnBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
-  showMsg('returnMsg','','');
-
-  const now = new Date().toISOString();
-
-  for (const transId of checked) {
-    const t = transactions.find(x => x.transId === transId);
-    if(t) {
-      t.returnedAt = now;
-    }
-    const payload = { action: 'WEB_RETURN', targetTransId: transId, timestamp: now };
-    await sendDataToSheet(payload);
-  }
-
-  updateUI();
-  showMsg('returnMsg','success', `บันทึกการคืนอุปกรณ์สำเร็จ`);
-
-  btn.disabled = false;
-  btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg> ยืนยันการคืนที่เลือก';
-  setTimeout(pullDataFromSheet, 2000);
+function stopPolling() {
+  if(pollHandle) clearInterval(pollHandle);
 }
 
-// ==========================================
-// ส่วนแสดงผล UI ต่างๆ
-// ==========================================
-function updateUI() {
-  const total = equipments.reduce((sum, e) => sum + e.qty, 0);
-  const avail = equipments.reduce((sum, e) => sum + getAvailableQty(e), 0);
-  const borrowed = total - avail;
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`).classList.add('active');
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  if (tabId === 'borrow') selectedEquipId = null;
+  updateUI();
+}
 
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statAvail').textContent = avail;
-  document.getElementById('statBorrowed').textContent = borrowed;
-  document.getElementById('statToday').textContent = transactions.length;
+function selectEquip(id) {
+  const avail = checkEquipAvailability(id);
+  if (avail <= 0) return;
+  selectedEquipId = id;
+  const eq = equipments.find(e => e.id === id);
+  const infoEl = document.getElementById('selectedEquipInfo');
+  infoEl.style.display = 'block';
+  infoEl.innerHTML = `<strong>อุปกรณ์ที่เลือก:</strong> ${eq.name} (${eq.id})`;
+  updateUI();
+}
 
-  renderEquipGrid();
-  renderReturnList();
-  renderHistory();
-  if (currentRole === 'admin') { renderAdminEquipStatus(); renderAdminBorrowers(); }
+function checkEquipAvailability(equipId) {
+  const eq = equipments.find(e => e.id === equipId);
+  if (!eq) return 0;
+  
+  const borrowedCount = transactions.filter(t => t.equipId === equipId && t.action === 'BORROW' && !t.returnedAt).length;
+  const damagedCount = transactions.filter(t => t.equipId === equipId && t.action === 'DAMAGED').length;
+  const repairedCount = transactions.filter(t => t.equipId === equipId && t.action === 'REPAIRED').length;
+  
+  return eq.qty - borrowedCount - (damagedCount - repairedCount);
 }
 
 function renderEquipGrid() {
   const grid = document.getElementById('equipGrid');
-  grid.innerHTML = equipments.map(e => {
-    const isDamaged = e.condition === 'damaged';
-    const avail = getAvailableQty(e);
-    const isOut = avail <= 0;
-    const isSel = e.id === selectedEquipId ? ' selected' : '';
-    const cardClass = isDamaged ? ' damaged' : (isOut ? ' borrowed' : '');
-    let statusHtml;
-    if (isDamaged) {
-      statusHtml = '<span class="equip-status damaged"><span class="equip-status-dot"></span>ชำรุด - งดให้ยืม</span>';
-    } else if (isOut) {
-      statusHtml = '<span class="equip-status borrowed"><span class="equip-status-dot"></span>ยืมครบจำนวนแล้ว</span>';
-    } else {
-      statusHtml = `<span class="equip-status available"><span class="equip-status-dot"></span>พร้อมให้ยืม ${avail}/${e.qty} ชิ้น</span>`;
+  grid.innerHTML = equipments.map(eq => {
+    const avail = checkEquipAvailability(eq.id);
+    const isSelected = selectedEquipId === eq.id;
+    let cardClass = 'equip-card';
+    let statusClass = 'available';
+    let statusText = `พร้อมยืม (${avail})`;
+    
+    if (avail <= 0) {
+      cardClass += ' borrowed';
+      statusClass = 'damaged';
+      statusText = 'หมด/ไม่พร้อมใช้งาน';
     }
-    return `
-      <div class="equip-card${isSel}${cardClass}" onclick="${isOut ? '' : `selectEquip('${e.id}')`}">
-        <div class="equip-name">${e.name}</div>
-        <div class="equip-id">${e.id}</div>
-        ${statusHtml}
+    if (isSelected) cardClass += ' selected';
+    
+    return `<div class="${cardClass}" onclick="selectEquip('${eq.id}')">
+      <div class="equip-name">${eq.name}</div>
+      <div class="equip-id">${eq.id}</div>
+      <div class="equip-status ${statusClass}">
+        <span class="equip-status-dot"></span> ${statusText}
       </div>
-    `;
+    </div>`;
   }).join('');
 }
 
-function selectEquip(id) {
-  const eq = equipments.find(e => e.id === id);
-  if (!eq || getAvailableQty(eq) <= 0) return;
-
-  selectedEquipId = id;
-  const info = document.getElementById('selectedEquipInfo');
-  info.style.display = 'block';
-  info.innerHTML = '<strong>เลือกอุปกรณ์:</strong> ' + eq.name + ' (' + eq.id + ') — เหลือ ' + getAvailableQty(eq) + '/' + eq.qty + ' ชิ้น';
-  renderEquipGrid();
+function updateStats() {
+  const totalQty = equipments.reduce((sum, eq) => sum + eq.qty, 0);
+  const totalAvail = equipments.reduce((sum, eq) => sum + checkEquipAvailability(eq.id), 0);
+  const totalBorrowed = transactions.filter(t => t.action === 'BORROW' && !t.returnedAt).length;
+  
+  const todayStr = new Date().toLocaleDateString('th-TH');
+  const todayTx = transactions.filter(t => {
+    if(!t.timestamp) return false;
+    return new Date(t.timestamp).toLocaleDateString('th-TH') === todayStr;
+  }).length;
+  
+  document.getElementById('statTotal').innerText = totalQty;
+  document.getElementById('statAvail').innerText = totalAvail;
+  document.getElementById('statBorrowed').innerText = totalBorrowed;
+  document.getElementById('statToday').innerText = todayTx;
 }
 
-// ==========================================
-// 🛡️ ฟังก์ชันเฉพาะแอดมิน
-// หมายเหตุ: รายการอุปกรณ์/สถานะอุปกรณ์อยู่ในตัวแปร equipments ฝั่งหน้าเว็บเท่านั้น
-// (ยังไม่ได้ผูกกับ Google Sheets) ถ้าต้องการให้ค่าคงอยู่ถาวรหลังรีโหลดหน้า
-// ต้องไปเพิ่ม endpoint ฝั่ง Apps Script ของคุณเองเพื่อบันทึก/ดึงรายการอุปกรณ์
-// ==========================================
-
-function adminAddEquipment() {
-  showMsg('adminAddMsg','','');
-  const id = document.getElementById('newEquipId').value.trim();
-  const name = document.getElementById('newEquipName').value.trim();
-  const qty = parseInt(document.getElementById('newEquipQty').value, 10);
-
-  if (!id || !name || !qty || qty < 1) {
-    return showMsg('adminAddMsg','error','กรุณากรอกข้อมูลให้ครบและจำนวนต้องมากกว่า 0');
+async function submitBorrow() {
+  if (!selectedEquipId) { showMsg('borrowFormMsg','error','กรุณาเลือกอุปกรณ์'); return; }
+  const bName = document.getElementById('borrowerName').value.trim();
+  const dep = document.getElementById('department').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const dDate = document.getElementById('dueDate').value;
+  const note = document.getElementById('borrowNote').value.trim();
+  
+  if (!bName || !dep || !phone || !dDate) {
+    showMsg('borrowFormMsg','error','กรุณากรอกข้อมูลที่มีเครื่องหมาย * ให้ครบถ้วน');
+    return;
   }
-  if (equipments.some(e => e.id === id)) {
-    return showMsg('adminAddMsg','error','รหัสอุปกรณ์นี้มีอยู่แล้ว กรุณาใช้รหัสอื่น');
-  }
-
-  equipments.push({ id, name, qty, condition: 'ok' });
-  showMsg('adminAddMsg','success', `เพิ่มอุปกรณ์ "${name}" (${id}) จำนวน ${qty} ชิ้น สำเร็จ`);
-
-  document.getElementById('newEquipId').value = '';
-  document.getElementById('newEquipName').value = '';
-  document.getElementById('newEquipQty').value = '5';
-
+  
+  const eq = equipments.find(e => e.id === selectedEquipId);
+  const payload = {
+    action: 'WEB_BORROW',
+    transId: generateId(),
+    timestamp: new Date().toISOString(),
+    equipId: eq.id,
+    equipName: eq.name,
+    borrowerName: bName,
+    department: dep,
+    phone: phone,
+    dueDate: dDate,
+    note: note
+  };
+  
+  const btn = document.getElementById('borrowBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
+  
+  // Fake add locally for fast UI
+  transactions.push(payload);
+  updateUI();
+  
+  await sendDataToSheet(payload);
+  
+  showMsg('borrowFormMsg','success','บันทึกการยืมเรียบร้อยแล้ว');
+  setTimeout(() => showMsg('borrowFormMsg','',''), 3000);
+  
+  document.getElementById('borrowerName').value = '';
+  document.getElementById('department').value = '';
+  document.getElementById('phone').value = '';
+  document.getElementById('dueDate').value = '';
+  document.getElementById('borrowNote').value = '';
+  selectedEquipId = null;
+  document.getElementById('selectedEquipInfo').style.display = 'none';
+  
+  btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg> ยืนยันการยืม';
   updateUI();
 }
 
-function toggleEquipCondition(id) {
-  const eq = equipments.find(e => e.id === id);
-  if (!eq) return;
-  eq.condition = (eq.condition === 'damaged') ? 'ok' : 'damaged';
-  if (eq.condition === 'damaged' && selectedEquipId === id) {
-    selectedEquipId = null;
-    document.getElementById('selectedEquipInfo').style.display = 'none';
+function renderReturnList() {
+  const container = document.getElementById('returnList');
+  const borrowed = transactions.filter(t => t.action === 'BORROW' && !t.returnedAt);
+  
+  if (borrowed.length === 0) {
+    container.innerHTML = '<div style="text-align:center;color:#888;padding:30px">ไม่มีรายการค้างคืน</div>';
+    document.getElementById('returnBtn').style.display = 'none';
+    return;
   }
-  updateUI();
-}
-
-function renderAdminEquipStatus() {
-  const el = document.getElementById('adminEquipStatusList');
-  if (!el) return;
-  el.innerHTML = equipments.map(e => {
-    const isDamaged = e.condition === 'damaged';
-    return `
-      <div class="admin-row">
-        <div>
-          <div class="admin-row-name">${e.name}</div>
-          <div class="admin-row-id">${e.id} • พร้อมให้ยืม ${getAvailableQty(e)}/${e.qty} ชิ้น</div>
-        </div>
-        <button class="btn btn-sm ${isDamaged ? 'btn-ok' : 'btn-damaged'}" onclick="toggleEquipCondition('${e.id}')">
-          ${isDamaged ? 'ปรับเป็นพร้อมใช้งาน' : 'แจ้งชำรุด'}
-        </button>
+  document.getElementById('returnBtn').style.display = 'inline-flex';
+  
+  container.innerHTML = borrowed.map(t => {
+    return `<div style="padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; gap:12px; background:#fff">
+      <input type="checkbox" class="return-cb" value="${t.transId}" style="width:18px;height:18px;cursor:pointer">
+      <div>
+        <div style="font-weight:600;font-size:14px;color:var(--blue-900)">${t.equipName}</div>
+        <div style="font-size:12px;color:#666">ผู้ยืม: ${t.borrowerName} | แผนก: ${t.department} | ยืมเมื่อ: ${new Date(t.timestamp).toLocaleDateString('th-TH')}</div>
       </div>
-    `;
+    </div>`;
+  }).join('');
+}
+
+async function submitReturn() {
+  const cbs = document.querySelectorAll('.return-cb:checked');
+  if (cbs.length === 0) { showMsg('returnMsg','error','กรุณาเลือกรายการที่ต้องการคืน'); return; }
+  
+  const btn = document.getElementById('returnBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> กำลังบันทึก...';
+  
+  const ts = new Date().toISOString();
+  
+  for (let cb of cbs) {
+    const tid = cb.value;
+    // Local Update
+    const tItem = transactions.find(x => x.transId === tid);
+    if(tItem) tItem.returnedAt = ts;
+    
+    await sendDataToSheet({
+      action: 'WEB_RETURN',
+      targetTransId: tid,
+      timestamp: ts
+    });
+  }
+  
+  showMsg('returnMsg','success','บันทึกการคืนเรียบร้อยแล้ว');
+  setTimeout(() => showMsg('returnMsg','',''), 3000);
+  btn.disabled = false; btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg> ยืนยันการคืนที่เลือก';
+  updateUI();
+}
+
+function renderHistory() {
+  const search = document.getElementById('searchHistory').value.toLowerCase();
+  const filter = document.getElementById('filterStatus').value;
+  let list = [...transactions];
+
+  // แก้ไข: ป้องกันบัคค้นหาพังด้วย (t.xxx || '')
+  if (search) list = list.filter(t => 
+    (t.borrowerName || '').toLowerCase().includes(search) || 
+    (t.equipName || '').toLowerCase().includes(search)
+  );
+
+  if (filter) list = list.filter(t => {
+    if (filter === 'BORROW') return t.action === 'BORROW' && !t.returnedAt;
+    if (filter === 'RETURN') return t.action === 'BORROW' && !!t.returnedAt;
+    return true;
+  });
+
+  const tbody = document.getElementById('historyTbody');
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">ไม่พบรายการ</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map(t => {
+    return `<tr>
+      <td style="font-size:11px;color:#888">${(t.transId || '').substring(0,8)}..</td>
+      <td>${t.timestamp ? new Date(t.timestamp).toLocaleDateString('th-TH') : '-'}</td>
+      <td>${t.equipName || '-'}</td>
+      <td>${t.borrowerName || 'แอดมิน'}</td>
+      <td>${t.department || '-'}</td>
+      <td>${t.dueDate || '-'}</td>
+      <td>${statusBadgeHtml(t)}</td>
+    </tr>`;
   }).join('');
 }
 
@@ -743,83 +666,98 @@ function renderAdminBorrowers() {
     return;
   }
   tbody.innerHTML = transactions.map(t => {
-    const isRet = !!t.returnedAt;
-    const badge = isRet ? 'badge-returned">คืนแล้ว' : 'badge-borrowed">กำลังยืม';
     return `<tr>
-      <td style="font-size:11px;color:#888">${t.transId.substring(0,8)}..</td>
-      <td>${t.borrowerName}</td>
-      <td>${t.department}</td>
+      <td style="font-size:11px;color:#888">${(t.transId || '').substring(0,8)}..</td>
+      <td>${t.borrowerName || 'แอดมิน'}</td>
+      <td>${t.department || '-'}</td>
       <td>${t.phone || '-'}</td>
-      <td>${t.equipName}</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.dueDate}</td>
-      <td><span class="badge ${badge}</span></td>
+      <td>${t.equipName || '-'}</td>
+      <td>${t.timestamp ? new Date(t.timestamp).toLocaleDateString('th-TH') : '-'}</td>
+      <td>${t.dueDate || '-'}</td>
+      <td>${statusBadgeHtml(t)}</td>
     </tr>`;
   }).join('');
 }
 
-function renderReturnList() {
-  const borrowed = transactions.filter(t => t.action === 'BORROW' && !t.returnedAt);
-  const el = document.getElementById('returnList');
-  if (borrowed.length === 0) {
-    el.innerHTML = '<div style="color:var(--gray-400);padding:12px 0">ขณะนี้ไม่มีอุปกรณ์ค้างคืนในระบบ</div>';
-    return;
-  }
-  el.innerHTML = `<div style="overflow-x:auto"><table><thead><tr><th>เลือก</th><th>รหัส</th><th>วันที่ยืม</th><th>อุปกรณ์</th><th>ผู้ยืม</th><th>กำหนดคืน</th></tr></thead><tbody>` +
-  borrowed.map(t => `
-    <tr>
-      <td><input type="checkbox" id="ret_${t.transId}" value="${t.transId}" style="width:16px;height:16px;cursor:pointer;"></td>
-      <td style="font-size:11px;color:#888">${t.transId.substring(0,8)}..</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td><span class="badge badge-borrowed">${t.dueDate}</span></td>
-    </tr>
-  `).join('') + `</tbody></table></div>`;
+function renderAdminEquipStatusList() {
+  const container = document.getElementById('adminEquipStatusList');
+  if(!container) return;
+  
+  container.innerHTML = equipments.map(eq => {
+    const damagedCount = transactions.filter(t => t.equipId === eq.id && t.action === 'DAMAGED').length;
+    const repairedCount = transactions.filter(t => t.equipId === eq.id && t.action === 'REPAIRED').length;
+    const netDamaged = damagedCount - repairedCount;
+    
+    return `<div class="admin-row">
+      <div>
+        <div class="admin-row-name">${eq.name}</div>
+        <div class="admin-row-id">รวม: ${eq.qty} ชิ้น | <span style="color:var(--red-600)">ชำรุดสะสม: ${netDamaged}</span></div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-sm btn-damaged" onclick="reportDamaged('${eq.id}')">+ แจ้งชำรุด</button>
+        <button class="btn btn-sm btn-ok" onclick="cancelDamaged('${eq.id}')" ${netDamaged <= 0 ? 'disabled' : ''}>− ยกเลิกชำรุด</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function renderHistory() {
-  const search = document.getElementById('searchHistory').value.toLowerCase();
-  const filter = document.getElementById('filterStatus').value;
-  let list = [...transactions];
+async function reportDamaged(equipId) {
+  if(!confirm('ยืนยันว่ามีอุปกรณ์ชิ้นนี้ชำรุด 1 ชิ้นใช่หรือไม่? (จะหักออกจากจำนวนพร้อมยืม)')) return;
+  const eq = equipments.find(e => e.id === equipId);
+  const payload = {
+    action: 'WEB_DAMAGED',
+    transId: generateId(),
+    timestamp: new Date().toISOString(),
+    equipId: eq.id,
+    equipName: eq.name,
+    note: 'แอดมินแจ้งชำรุด 1 ชิ้น'
+  };
+  transactions.push(payload);
+  updateUI();
+  await sendDataToSheet(payload);
+  updateUI();
+}
 
-  if (search) list = list.filter(t => t.borrowerName.toLowerCase().includes(search) || t.equipName.toLowerCase().includes(search));
-  if (filter) list = list.filter(t => filter === 'BORROW' ? !t.returnedAt : t.returnedAt);
-
-  const tbody = document.getElementById('historyTbody');
-  if (list.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:20px;">ไม่พบรายการ</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = list.map(t => {
-    const isRet = !!t.returnedAt;
-    const badge = isRet ? 'badge-returned">คืนแล้ว' : 'badge-borrowed">กำลังยืม';
-    return `<tr>
-      <td style="font-size:11px;color:#888">${t.transId.substring(0,8)}..</td>
-      <td>${new Date(t.timestamp).toLocaleDateString('th-TH')}</td>
-      <td>${t.equipName}</td>
-      <td>${t.borrowerName}</td>
-      <td>${t.department}</td>
-      <td>${t.dueDate}</td>
-      <td><span class="badge ${badge}</span></td>
-    </tr>`;
-  }).join('');
+async function cancelDamaged(equipId) {
+  if(!confirm('ยืนยันยกเลิกการชำรุด 1 ชิ้น (นำกลับเข้าสู่สต็อก) ใช่หรือไม่?')) return;
+  const eq = equipments.find(e => e.id === equipId);
+  const payload = {
+    action: 'WEB_REPAIRED',
+    transId: generateId(),
+    timestamp: new Date().toISOString(),
+    equipId: eq.id,
+    equipName: eq.name,
+    note: 'แอดมินยกเลิกแจ้งชำรุด 1 ชิ้น'
+  };
+  transactions.push(payload);
+  updateUI();
+  await sendDataToSheet(payload);
+  updateUI();
 }
 
 function showMsg(elId, type, msg) {
   const el = document.getElementById(elId);
   if (!msg) { el.innerHTML = ''; return; }
-  const icon = type === 'success' ? '<path d="M5 12l5 5L20 7"/>' : '<path d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>';
-  el.innerHTML = `<div class="alert alert-${type}"><svg viewBox="0 0 24 24">${icon}</svg><span>${msg}</span></div>`;
+  const icon = type === 'success' ? '<path d="M5 12l5 5L20 7"/>' : '<path d="M12 8v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 1h10.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>';
+  el.innerHTML = `<div class="alert alert-${type}"><svg viewBox="0 0 24 24">${icon}</svg> <div>${msg}</div></div>`;
 }
 
-// ตั้งวันที่เริ่มต้นอัตโนมัติ
-const d = new Date(); d.setDate(d.getDate() + 3);
-document.getElementById('dueDate').value = d.toISOString().split('T')[0];
+function statusBadgeHtml(t) {
+  if (t.action === 'BORROW') {
+    if (t.returnedAt) return `<span class="badge badge-returned">คืนแล้ว</span>`;
+    if (t.dueDate && new Date(t.dueDate) < new Date(new Date().setHours(0,0,0,0))) {
+      return `<span class="badge badge-overdue">เลยกำหนด</span>`;
+    }
+    return `<span class="badge badge-borrowed">กำลังยืม</span>`;
+  }
+  if (t.action === 'DAMAGED') return `<span class="badge badge-damaged">แจ้งชำรุด</span>`;
+  if (t.action === 'REPAIRED') return `<span class="badge badge-repaired">ยกเลิกชำรุด</span>`;
+  return `<span class="badge">-</span>`;
+}
 
-// หมายเหตุ: ระบบหลัก (updateUI / pullDataFromSheet / setInterval) จะเริ่มทำงาน
-// ก็ต่อเมื่อเข้าสู่ระบบสำเร็จแล้วเท่านั้น (ดูฟังก์ชัน enterApp ด้านบน)
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+}
 </script>
 </body>
 </html>
